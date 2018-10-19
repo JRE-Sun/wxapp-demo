@@ -38,6 +38,6 @@
 3. 全局安装gulp `cnpm/npm i g gulp`
 4. 安装成功后,在当前目录执行`gulp`
 
-**注意:**文件夹`wxapp`存放小程序代码,每次新建scss文件需要重启gulp,否则gulp监听不到
+**注意:** 文件夹`wxapp`存放小程序代码,每次新建scss文件需要重启gulp,否则gulp监听不到
 
 
