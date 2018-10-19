@@ -1,0 +1,18 @@
+@charset "UTF-8";
+@function rpx($px) {
+    @return $px *2 +rpx;
+}
+
+$page-bg-color: #F3F4F5;
+$content-bg-color: #FCFCFC;
+$content-red-color: red;
+$color-666: #666;
+$color-orange: rgb(254, 76, 64);
+$color-238: rgb(238, 238, 238);
+$color-252: rgb(252, 252, 252);
+$color-204: rgb(204, 204, 204);
+$color-2547664: rgb(254, 76, 64);
+$color-2541520: rgb(254, 152, 0);
+$color-102: rgb(102, 102, 102);
+$color-51: rgb(51, 51, 51);
+$color-153: rgb(153, 153, 153);

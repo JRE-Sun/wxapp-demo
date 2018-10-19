@@ -1,0 +1,16 @@
+@charset "UTF-8";
+@import "./style/var";
+@import "./style/clear";
+@import "./style/flex";
+@import "./style/font";
+@import "./style/fixed";
+@import "./style/position";
+@import "./style/margin";
+
+image {
+    margin: 0 auto;
+}
+
+img, view, swiper, swiper-item, page, text {
+    box-sizing: border-box;
+}

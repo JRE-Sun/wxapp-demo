@@ -1,0 +1,45 @@
+.clear-20, .clear-10, .clear-8, .clear-6 {
+    background-color: $page-bg-color;
+}
+
+.clear-20 {
+    height: rpx(20);
+}
+
+.clear-10, .height-10 {
+    height: rpx(10);
+}
+
+.clear-8, .height-8 {
+    height: rpx(8);
+}
+
+.clear-6, .height-6 {
+    height: rpx(6);
+}
+
+.clear-line {
+    text-align: center;
+    overflow: hidden;
+    padding: rpx(7) 0 rpx(7) 0;
+    text {
+        display: inline-block;
+        position: relative;
+        &:after, &:before {
+            content: '';
+            top: 50%;
+            height: 1px;
+            width: 100%;
+            background-color: $color-153;
+            position: absolute;
+        }
+        &:after {
+            left: rpx(-10);
+            transform: translate(-100%, -50%) scaleY(.5);
+        }
+        &:before {
+            right: rpx(-10);
+            transform: translate(100%, -50%) scaleY(.5);
+        }
+    }
+}

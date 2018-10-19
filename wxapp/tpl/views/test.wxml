@@ -1,0 +1,4 @@
+<template name="test">
+    <view>{{ test.testData }}</view>
+    <button wx:if="{{ test.showBtn }}">上面文字改变,我就消失哦</button>
+</template>
