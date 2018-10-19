@@ -16,7 +16,6 @@ module.exports = {
             let currRunEvent = n.runEvent;
             if (typeof currRunEvent === 'undefined') return;
             for (let key in currRunEvent) {
-                console.log(runEvent, typeof runEvent[key] === 'undefined');
                 if (typeof runEvent[key] === 'undefined') runEvent[key] = [];
                 runEvent[key] = runEvent[key].concat(currRunEvent[key]);
             }
