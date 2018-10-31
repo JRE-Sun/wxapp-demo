@@ -1,26 +1,26 @@
 let defaultConfig = require('./default');
-let util = require('./util');
+let util          = require('./util');
 
 module.exports = {
     mergeConfig(tplUrlName) {
         let runEventArray = [];
-        let mergeTplJs = {};
-        let runEvent = {};
+        let mergeTplJs    = {};
+        let runEvent      = {};
         // 根据组件名称 合并组件
         tplUrlName.forEach(n => {
             let tplJs = require(`../tpl/js/${n}`);
-            tplJs.data && runEventArray.push(tplJs.data);
+            tplJs.mix && runEventArray.push(tplJs.mix);
             mergeTplJs = util.merge(mergeTplJs, tplJs);
         });
         runEventArray.forEach(n => {
-            let currRunEvent = n.runEvent;
+            let currRunEvent = n.__event;
             if (typeof currRunEvent === 'undefined') return;
             for (let key in currRunEvent) {
                 if (typeof runEvent[key] === 'undefined') runEvent[key] = [];
                 runEvent[key] = runEvent[key].concat(currRunEvent[key]);
             }
         });
-        mergeTplJs.data.runEvent = runEvent;
+        mergeTplJs.mix.__event = runEvent;
         return mergeTplJs;
     },
     runPage(setting, tplUrlName = []) {
@@ -30,21 +30,26 @@ module.exports = {
         }
         let mergeRunEvent;
         let settingRunEvent;
-        if (mergeTplJs.data) {
-            mergeRunEvent = mergeTplJs.data.runEvent || {};
+        if (mergeTplJs.mix) {
+            mergeRunEvent = mergeTplJs.mix.__event || {};
         }
-        if (setting.data) {
-            settingRunEvent = setting.data.runEvent || {};
+        if (setting.mix) {
+            settingRunEvent = setting.mix.__event || {};
         }
-        let runEvent = util._.mergeWith(mergeRunEvent, settingRunEvent, function(a, b) {
+        let __event = util._.mergeWith(mergeRunEvent, settingRunEvent, function (a, b) {
             if (util._.isArray(a) && util._.isArray(b)) {
                 return a.concat(b);
             }
         });
-        setting = util.merge(setting, mergeTplJs);
-        if (setting.data && setting.data.runEvent) {
-            setting.data.runEvent = runEvent;
+        setting     = util.merge({}, mergeTplJs, setting);
+        if (setting.mix && setting.mix.__event) {
+            setting.mix.__event = __event;
         }
-        Page(util.merge(setting, defaultConfig));
+        setting = util.merge({}, defaultConfig, setting);
+        // 当前页面 分享按钮
+        if (setting.mix && setting.mix.share) {
+            setting = util.merge({}, require('./share'), setting);
+        }
+        Page(setting);
     }
 };

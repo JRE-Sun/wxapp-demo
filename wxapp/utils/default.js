@@ -4,8 +4,10 @@ let util = require('./util');
 
 // 每个页面都会有的共有方法
 module.exports = {
-    data: {
-
+    data: {},
+    mix : {
+        goBackTimer: null, // 页面加载失败,goBack方法的timer
+        share      : true, // 默认页面能够分享
     },
     openPage(e) {
         let dataset = {};
@@ -17,32 +19,19 @@ module.exports = {
         }
     },
 
-    storage(key, data = null) {
-        if (data === null) {
-            try {
-                data = wx.getStorageSync(key);
-            } catch (e) {
-                data = false;
-            }
-            return data;
-        }
-
-        try {
-            wx.setStorageSync(key, data);
-        } catch (e) {
-            console.log('缓存失败');
-        }
-    },
-
     previewImages(e) {
         let dataset = e.currentTarget.dataset;
+        if (typeof dataset.previewUrls === 'undefined') {
+            dataset.previewUrls = [dataset.previewUrl];
+        }
         wx.previewImage({
-            urls: dataset.previewUrls,
+            urls   : dataset.previewUrls,
             current: dataset.previewUrl,
         })
     },
+
     runEvent(key, data) {
-        let runEventList = this.data.runEvent;
+        let runEventList = this.mix.__event;
         if (typeof runEventList === 'undefined') return;
         let callBackArray = runEventList[key];
         if (typeof callBackArray === 'undefined') return;
@@ -52,29 +41,13 @@ module.exports = {
     },
 
     goBack(time = 1600) {
-        setTimeout(() => {
+        let timer = setTimeout(() => {
+            if (!this.mix.goBackTimer) return;
             wx.navigateBack();
         }, time);
+
+        this.mix.goBackTimer = timer;
     },
-
-    /**
-     * 转换 腾讯坐标->百度坐标,并且保留小数点后六位
-     * @return {*}
-     */
-    formatLocation(location) {
-        let options = null;
-        let { latitude, longitude } = location;
-        if (typeof latitude !== 'undefined' && typeof longitude !== 'undefined') {
-            options = util.tencent2baidu(latitude, longitude);
-            options = {
-                longitude: Math.ceil(options.longitude * 1000000) / 1000000,
-                latitude: Math.ceil(options.latitude * 1000000) / 1000000,
-            };
-        }
-        return options;
-    },
-
-
 
     /**
      * 生命周期函数--监听页面显示
@@ -94,73 +67,76 @@ module.exports = {
     },
 
     /**
+     * 更新混合mix数据
+     * @param key
+     * @param value
+     */
+    updateMixData(key, value) {
+        let mixData   = this.mix[key] || {};
+        this.mix[key] = util.merge(mixData, value);
+    },
+
+    /**
      * 更新组件data
      */
     updateTplData(name, value) {
         let currTplData = this.data[name] || {};
-        let tplData = {};
-        tplData[name] = util.merge(currTplData, value);
+        let tplData     = {};
+        tplData[name]   = util.merge(currTplData, value);
         this.setData(tplData);
     },
 
     /**
-     * 获取元素的宽高top之类的属性
-     * @param {*} select 
+     * 加载图片,用于canvas画图
+     * @param imgPath
+     * @return {Promise<any>}
      */
-    querySelector(select) {
-        let query = wx.createSelectorQuery();
-        query.select(select).boundingClientRect();
+    loadImg(imgPath) {
         return new Promise((a, b) => {
-            query.exec(res => {
-                a(res[0]);
-            })
+            wx.downloadFile({
+                url    : imgPath,
+                success: function (res) {
+                    if (res.statusCode === 200) {
+                        a(res.tempFilePath);
+                    }
+                }
+            });
         });
     },
 
     /**
      * 生命周期函数--监听页面初次渲染完成
      */
-    onReady: function() {
+    onReady: function () {
         this.runEvent('pageOnReady');
     },
 
     /**
      * 生命周期函数--监听页面隐藏
      */
-    onHide: function() {
+    onHide  : function () {
         this.runEvent('pageOnHide');
     },
     /**
      * 生命周期函数--监听页面卸载
      */
-    onUnload: function() {
-
+    onUnload: function () {
+        this.runEvent('pageOnUnload');
+        clearTimeout(this.mix.goBackTimer);
+        this.mix.goBackTimer = null;
     },
 
     /**
      * 页面相关事件处理函数--监听用户下拉动作
      */
-    onPullDownRefresh: function() {
+    onPullDownRefresh: function () {
 
     },
 
     /**
      * 页面上拉触底事件的处理函数
      */
-    onReachBottom: function() {
+    onReachBottom: function () {
         this.runEvent('pageBottomLoad');
     },
-
-    /**
-     * 用户点击右上角分享
-     */
-    onShareAppMessage: function(res) {
-        let pages = getCurrentPages();
-        let currPage = pages[pages.length - 1];
-        let currPageUrl = currPage.route;
-        return {
-            title: '标题',
-            path: '/' + currPageUrl
-        }
-    }
 };
