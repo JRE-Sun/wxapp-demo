@@ -6,9 +6,16 @@ let util = require('./util');
 module.exports = {
     data: {},
     mix : {
-        goBackTimer: null, // 页面加载失败,goBack方法的timer
-        share      : true, // 默认页面能够分享
+        pageScrollTime : new Date().getTime(),
+        pageScrollTimer: null, // 页面滚动timer
+        goBackTimer    : null, // 页面加载失败,goBack方法的timer
+        share          : true, // 默认页面能够分享
     },
+
+    /**
+     * 打开新页面
+     * @param e
+     */
     openPage(e) {
         let dataset = {};
         if (e.currentTarget && e.currentTarget.dataset) {
@@ -19,6 +26,24 @@ module.exports = {
         }
     },
 
+    /**
+     * 重定向页面
+     * @param e
+     */
+    redirectPage(e) {
+        let dataset = {};
+        if (e.currentTarget && e.currentTarget.dataset) {
+            dataset = e.currentTarget.dataset;
+            wx.redirectTo({
+                url: `/pages/${dataset.query}`
+            })
+        }
+    },
+
+    /**
+     * 预览图片
+     * @param e
+     */
     previewImages(e) {
         let dataset = e.currentTarget.dataset;
         if (typeof dataset.previewUrls === 'undefined') {
@@ -30,6 +55,11 @@ module.exports = {
         })
     },
 
+    /**
+     * 事件分发函数(核心功能)
+     * @param key
+     * @param data
+     */
     runEvent(key, data) {
         let runEventList = this.mix.__event;
         if (typeof runEventList === 'undefined') return;
@@ -40,19 +70,20 @@ module.exports = {
         });
     },
 
+    /**
+     * 返回上个页面
+     * @param time 单位s,默认1.6s后返回上个页面
+     */
     goBack(time = 1600) {
-        let timer = setTimeout(() => {
+        this.mix.goBackTimer = setTimeout(() => {
             if (!this.mix.goBackTimer) return;
             wx.navigateBack();
         }, time);
-
-        this.mix.goBackTimer = timer;
     },
 
     /**
      * 生命周期函数--监听页面显示
      */
-
     onShow() {
         console.log('onShow');
         this.runEvent('pageOnShow');
@@ -63,6 +94,7 @@ module.exports = {
      */
     onLoad(options) {
         console.log('onLoad', options);
+        this.onLoadShared(options);
         this.runEvent('pageOnLoad', options);
     },
 
@@ -84,6 +116,14 @@ module.exports = {
         let tplData     = {};
         tplData[name]   = util.merge(currTplData, value);
         this.setData(tplData);
+    },
+
+    /**
+     * 通过分享进来
+     * @param options
+     */
+    onLoadShared(options) {
+        // 分享进来
     },
 
     /**
@@ -124,6 +164,26 @@ module.exports = {
         this.runEvent('pageOnUnload');
         clearTimeout(this.mix.goBackTimer);
         this.mix.goBackTimer = null;
+    },
+
+    /**
+     * 页面滚动事件
+     * @param e
+     */
+    onPageScroll: function (e) {
+        let pageScrollTime       = this.mix.pageScrollTime;
+        let currTime             = new Date().getTime();
+        // 就算一直在滚动,没有停,也要在滚动过程中,每500ms运行一次
+        this.mix.pageScrollTimer = setTimeout(() => {
+            this.runEvent('pageScroll', e.scrollTop);
+        }, 500);
+
+        // 如果两次滚动之间时间小于300ms,不变化
+        if (currTime - pageScrollTime < 300) return;
+        clearTimeout(this.mix.pageScrollTimer);
+        this.mix.pageScrollTimer = null;
+        this.mix.pageScrollTime  = currTime;
+        this.runEvent('pageScroll', e.scrollTop);
     },
 
     /**

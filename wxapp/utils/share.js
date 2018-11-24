@@ -10,10 +10,6 @@ module.exports = {
         this.mix.shareImage = img;
     },
 
-    onLoadShared(options) {
-        // 分享进来
-    },
-
     /**
      * 用户点击右上角分享
      */

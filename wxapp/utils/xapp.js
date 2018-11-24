@@ -20,7 +20,9 @@ module.exports = {
                 runEvent[key] = runEvent[key].concat(currRunEvent[key]);
             }
         });
-        mergeTplJs.mix.__event = runEvent;
+        if (mergeTplJs.mix) {
+            mergeTplJs.mix.__event = runEvent;
+        }
         return mergeTplJs;
     },
     runPage(setting, tplUrlName = []) {
