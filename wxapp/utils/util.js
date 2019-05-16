@@ -338,7 +338,7 @@ util._typeOf = function (val) {
 }
 
 util.isArray          = arr => {
-    return _typeOf(arr).search('Array') > -1;
+    return util._typeOf(arr).search('Array') > -1;
 };
 util.checkArrayLength = arr => {
     if (!isArray(arr)) return null;
@@ -368,17 +368,17 @@ util.addDiff = function addDiff(
         let key   = item[0],
             value = item[1],
             path  = root === '' ? key : root + '.' + key
-        if (_typeOf(current) === TYPE_ARRAY) {
+        if (util._typeOf(current) === TYPE_ARRAY) {
             path = root === '' ? key : root + '[' + key + ']'
         }
 
         if (!prev.hasOwnProperty(key)) {
             result[path] = value
         } else if (
-            (_typeOf(prev[key]) === TYPE_OBJECT &&
-                _typeOf(current[key]) === TYPE_OBJECT) ||
-            (_typeOf(prev[key]) === TYPE_ARRAY &&
-                _typeOf(current[key]) === TYPE_ARRAY)
+            (util._typeOf(prev[key]) === TYPE_OBJECT &&
+                util._typeOf(current[key]) === TYPE_OBJECT) ||
+            (util._typeOf(prev[key]) === TYPE_ARRAY &&
+                util._typeOf(current[key]) === TYPE_ARRAY)
         ) {
             addDiff(current[key], prev[key], path, result)
         } else if (prev[key] !== current[key]) {
@@ -398,17 +398,17 @@ util.nullDiff = function nullDiff(
         let key   = item[0],
             value = item[1],
             path  = root === '' ? key : root + '.' + key
-        if (_typeOf(current) === TYPE_ARRAY) {
+        if (util._typeOf(current) === TYPE_ARRAY) {
             path = root === '' ? key : root + '[' + key + ']'
         }
 
         if (!current.hasOwnProperty(key)) {
             result[path] = null
         } else if (
-            (_typeOf(prev[key]) === TYPE_OBJECT &&
-                _typeOf(current[key]) === TYPE_OBJECT) ||
-            (_typeOf(prev[key]) === TYPE_ARRAY &&
-                _typeOf(current[key]) === TYPE_ARRAY)
+            (util._typeOf(prev[key]) === TYPE_OBJECT &&
+                util._typeOf(current[key]) === TYPE_OBJECT) ||
+            (util._typeOf(prev[key]) === TYPE_ARRAY &&
+                util._typeOf(current[key]) === TYPE_ARRAY)
         ) {
             nullDiff(current[key], prev[key], path, result)
         }
@@ -418,8 +418,8 @@ util.nullDiff = function nullDiff(
 
 util.diff = function diff(current = {}, prev = {}) {
     let result = {};
-    addDiff(current, prev, '', result);
-    nullDiff(current, prev, '', result);
+    util.addDiff(current, prev, '', result);
+    util. nullDiff(current, prev, '', result);
     return result;
 };
 
@@ -615,11 +615,11 @@ util.hideShareMenu = () => {
  * @return {{}}
  */
 util.formatDataByDiff = (key, newValue, oldValue) => {
-    if (isArray(oldValue)) {
+    if (util.isArray(oldValue)) {
         return {[key]: newValue};
     }
     console.log(key, newValue, oldValue, 'key, newValue, oldValue');
-    let diffData = diff(newValue, oldValue);
+    let diffData = util.diff(newValue, oldValue);
     console.log(diffData, 'diffData');
     let diffObj = {};
     Object.keys(diffData).forEach(n => {
@@ -630,7 +630,7 @@ util.formatDataByDiff = (key, newValue, oldValue) => {
             return Number.isNaN(n * 1) ? n : `[${n}]`;
         }).join('.');
 
-        diffObj[`${key}.${m}`] = deepClone(diffData[n]);
+        diffObj[`${key}.${m}`] = util.deepClone(diffData[n]);
     });
     return diffObj;
 };

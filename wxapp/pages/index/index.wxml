@@ -1,2 +1,17 @@
-<view class="index-page">
+<view class="page">
+    <button class="page__item font-16"
+            data-query="page/newPage?a=1&&b=2"
+            catch:tap="openPage">打开新页面,携带参数a=1,b=2
+    </button>
+    <button class="page__item font-16"
+            data-query="page/redirectPage"
+            catch:tap="redirectPage">页面重定向到redirectPage
+    </button>
+    <button class="page__item font-16"
+            data-query="page/storePage"
+            catch:tap="openPage">页面间$store共享
+    </button>
+    <!--<image src="../../image/code.jpeg"-->
+    <!--mode="widthFix">-->
+    <!--</image>  -->
 </view>

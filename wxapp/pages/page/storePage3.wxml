@@ -1,0 +1,4 @@
+<view catch:tap="storeAddClickCount"
+      style="height:50px;background:#fff">
+    此区域可点击增加count: count => {{ $store.count }}
+</view>

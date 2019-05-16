@@ -1,11 +1,16 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/page/newPage",
+    "pages/page/redirectPage",
+    "pages/page/storePage",
+    "pages/page/storePage2",
+    "pages/page/storePage3"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fcfcfc",
-    "navigationBarTitleText": "demo",
+    "navigationBarTitleText": "wxapp",
     "navigationBarTextStyle": "black"
   },
   "sitemapLocation": "sitemap.json"

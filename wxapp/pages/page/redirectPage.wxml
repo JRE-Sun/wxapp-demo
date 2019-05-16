@@ -1,0 +1,4 @@
+<button class="page__item font-16"
+        data-query="index/index"
+        catch:tap="redirectPage">关闭当前页面,页面重定向到首页
+</button>

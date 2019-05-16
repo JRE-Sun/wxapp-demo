@@ -1,6 +1,6 @@
 @charset "UTF-8";
 @function rpx($px) {
-    @return $px *2 +rpx;
+    @return $px + rpx;
 }
 
 $page-bg-color: #F3F4F5;

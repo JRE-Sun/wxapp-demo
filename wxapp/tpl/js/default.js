@@ -22,7 +22,11 @@ module.exports = {
      * @return {*}
      */
     getPageData(key) {
-        return util.deepClone(this.data[key]);
+        let value = this.data;
+        key.split('.').forEach(n => {
+            value = value[n];
+        });
+        return util.deepClone(value);
     },
 
     /**

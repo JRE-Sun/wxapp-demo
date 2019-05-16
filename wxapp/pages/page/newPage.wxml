@@ -1,0 +1,3 @@
+<view>获取的页面参数</view>
+<view>a:{{ options.a }}</view>
+<view>b:{{ options.b }}</view>
