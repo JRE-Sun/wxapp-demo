@@ -16,5 +16,4 @@ let setting = {
 };
 
 // 如果页面不需要其他组件,直接 xapp.runPage(setting);
-// 该页面所需要引入的组件 ['test', 'a']
-xapp.runPage(setting, ['test', 'a']);
+xapp.runPage(setting);

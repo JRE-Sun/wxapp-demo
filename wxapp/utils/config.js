@@ -1,4 +1,7 @@
 module.exports = {
+
+    log: true, // true => 打印log信息, false => 关闭log信息
+
     appid: '', // 小程序appid
 
     apk: '', // 百度apk等等...

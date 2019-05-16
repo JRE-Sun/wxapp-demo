@@ -1,8 +1,6 @@
-let openThreadErr = require('./config').http.config || false;
+let openThreadErr = require('./config').http.openThreadErr || false;
 let util          = require('./util');
-
-
-module.exports = {
+module.exports    = {
     mergeConfig(tplUrlName) {
         let runEventArray = [];
         let mergeTplJs    = {};

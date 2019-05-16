@@ -1,6 +1,6 @@
-let util              = require('./util');
-let openThreadErr     = require('./config').http.config || false;
-let {http, threadErr} = require('../../utils/http-thread');
+let util          = require('../../utils/util');
+let openThreadErr = require('../../utils/config').http.config || false;
+let app           = getApp();
 // 这是每个小程序页面,共有的配置,最后回自动合并到setting中
 
 // 每个页面都会有的共有方法
@@ -288,33 +288,13 @@ module.exports = {
     },
 
     /**
-     * 页面滚动事件
-     * @param e
-     */
-    // onPageScroll: function (e) {
-    //     let pageScrollTime       = this.mix.pageScrollTime;
-    //     let currTime             = new Date().getTime();
-    //     // 就算一直在滚动,没有停,也要在滚动过程中,每500ms运行一次
-    //     this.mix.pageScrollTimer = setTimeout(() => {
-    //         this.runEvent('pageScroll', e.scrollTop);
-    //     }, 500);
-    //
-    //     // 如果两次滚动之间时间小于300ms,不变化
-    //     if (currTime - pageScrollTime < 300) return;
-    //     clearTimeout(this.mix.pageScrollTimer);
-    //     this.mix.pageScrollTimer = null;
-    //     this.mix.pageScrollTime  = currTime;
-    //     this.runEvent('pageScroll', e.scrollTop);
-    // },
-
-    /**
      * 打开调试
      */
-    openConsole() {
+    openConsole(time = null) {
         this.mix.consoleCount++;
         if (this.mix.consoleCount === 7) {
             console.error('打开调试');
-            app.storage('_debug', true, 30 * 60);
+            util.storage('_debug', true, !!time ? time : 30 * 60);
             wx.setEnableDebug({
                 enableDebug: true
             })

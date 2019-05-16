@@ -1,7 +1,11 @@
 let _                  = require('./lodash.min');
 let app                = getApp();
+let {log}              = require('./config');
 let regeneratorRuntime = require('./runtime-module');
-let wx                 = wx;
+let util               = {};
+
+util._     = _;
+util.merge = _.merge;
 
 /**
  * 腾轩转百度
@@ -9,7 +13,7 @@ let wx                 = wx;
  * @param longitude
  * @return {{longitude: (number|*), latitude: (number|*)}}
  */
-const tencent2baidu = (latitude, longitude) => {
+util.tencent2baidu = (latitude, longitude) => {
     let x_pi  = 3.14159265358979324 * 3000.0 / 180.0;
     let x     = longitude;
     let y     = latitude;
@@ -26,7 +30,7 @@ const tencent2baidu = (latitude, longitude) => {
 /**
  * 百度经纬度坐标转换腾讯坐标
  */
-const badidu2tencent = (lat, lng) => {
+util.badidu2tencent = (lat, lng) => {
     let x_pi  = 3.14159265358979324 * 3000.0 / 180.0;
     let x     = lng * 1 - 0.0065, y = lat * 1 - 0.006;
     let z     = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);
@@ -40,12 +44,36 @@ const badidu2tencent = (lat, lng) => {
 }
 
 /**
+ * 检查是否为Debug模式,来动态显示隐藏console
+ */
+util.checkDebug = (debugKey = '_debug') => {
+    if (log) {
+        util.storage('_debug', true, 30 * 60);
+        return;
+    }
+    if (!util.storage(debugKey)) {
+        util.closeConsole();
+    }
+};
+
+/**
+ * 关闭console
+ */
+util.closeConsole = () => {
+    console.log   = () => {
+    };
+    console.error = () => {
+    };
+};
+
+
+/**
  * 计算两个点的距离距离
  * @param location1 第一点的纬度，经度；
  * @param Location2 第二点的纬度，经度
  * @return {number}
  */
-const getDisByLocation = (location1, Location2) => {
+util.getDisByLocation = (location1, Location2) => {
     function Rad(d) {
         return d * Math.PI / 180.0;
     }
@@ -71,7 +99,7 @@ const getDisByLocation = (location1, Location2) => {
  * 设置页面标题
  * @param title
  */
-const setTitleBar = title => {
+util.setTitleBar = title => {
     wx.setNavigationBarTitle({
         title: title,
     });
@@ -83,7 +111,7 @@ const setTitleBar = title => {
  * @param month
  * @return {number}
  */
-const getMonthHasDayCounts = (year, month) => {
+util.getMonthHasDayCounts = (year, month) => {
     let date = new Date();
     date.setFullYear(year);
     date.setMonth(month);
@@ -98,7 +126,7 @@ const getMonthHasDayCounts = (year, month) => {
  * @param day
  * @return {number}
  */
-const getDateDay = (year, month, day) => {
+util.getDateDay = (year, month, day) => {
     let date = new Date();
     date.setFullYear(year);
     date.setMonth(month - 1);
@@ -113,7 +141,7 @@ const getDateDay = (year, month, day) => {
  * @param duration 保存多长时间s
  * @return {*}
  */
-const storage = (key, data = null, duration = null) => {
+util.storage = (key, data = null, duration = null) => {
     if (data === null) {
         try {
             data = wx.getStorageSync(key) || false;
@@ -157,7 +185,7 @@ const storage = (key, data = null, duration = null) => {
  * @param callback
  * @return {number}
  */
-const getTwoTimerTime = (startTime, endTime, callback) => {
+util.getTwoTimerTime = (startTime, endTime, callback) => {
     if (Object.prototype.toString.call(startTime).search(/String/) > -1 && startTime.search(/-/g) > -1) {
         let endStr = '.0';
         let d      = startTime.length - endStr.length;
@@ -182,7 +210,7 @@ const getTwoTimerTime = (startTime, endTime, callback) => {
  * @param callback
  * @return {{day: number, hour: *, minute: *, second: *}}
  */
-const getTwoTimeDistance = (milliSecond, callback) => {
+util.getTwoTimeDistance = (milliSecond, callback) => {
     let leftSecond = parseInt(milliSecond / 1000);
     let day        = Math.floor(leftSecond / (60 * 60 * 24));
     let hour       = Math.floor((leftSecond - day * 24 * 60 * 60) / 3600);
@@ -198,7 +226,7 @@ const getTwoTimeDistance = (milliSecond, callback) => {
     return timeObj;
 };
 
-const compose = (...args) => {
+util.compose = (...args) => {
     let i      = args.length - 1;
     let result = null;
     return function f(...argement) {
@@ -213,7 +241,7 @@ const compose = (...args) => {
  * 柯里化
  * @param fn
  */
-const curry = fn => {
+util.curry = fn => {
     // 首次传进来一个函数
     // 然后返回一个函数
     return function fn1(...args) {
@@ -232,7 +260,7 @@ const curry = fn => {
 /**
  * 删除数组里keys
  */
-const deleteArrayKeys = (array, keys) => {
+util.deleteArrayKeys = (array, keys) => {
     return array.map(n => {
         return deleteKeys(n, keys);
     });
@@ -242,7 +270,7 @@ const deleteArrayKeys = (array, keys) => {
 /**
  * 删除对象里keys
  */
-const deleteKeys = (obj, keys) => {
+util.deleteKeys = (obj, keys) => {
     keys.forEach(key => {
         obj.hasOwnProperty(key) && delete obj[key];
     });
@@ -253,7 +281,7 @@ const deleteKeys = (obj, keys) => {
  * 管道
  * @param fn
  */
-const pipe = (...fn) => {
+util.pipe = (...fn) => {
     // 首次传进来n个函数
     // 然后返回一个函数,该函数接收一个参数
     let length = fn.length;
@@ -303,23 +331,25 @@ Maybe.prototype.chain = function (fn) {
     return this.map(fn).join();
 };
 
-const _typeOf = function (val) {
+util.Maybe = Maybe;
+
+util._typeOf = function (val) {
     return Object.prototype.toString.call(val)
 }
 
-const isArray          = arr => {
+util.isArray          = arr => {
     return _typeOf(arr).search('Array') > -1;
 };
-const checkArrayLength = arr => {
+util.checkArrayLength = arr => {
     if (!isArray(arr)) return null;
     return arr.length > 0 ? arr : null;
 };
-const arrFirst         = arr => {
+util.arrFirst         = arr => {
     if (!isArray(arr)) return null;
     if (arr.length === 0) return null;
     return arr[0];
 };
-const maybeMap         = curry((fn, maybe) => maybe.map(fn));
+util.maybeMap         = util.curry((fn, maybe) => maybe.map(fn));
 
 const TYPE_ARRAY  = '[object Array]'
 const TYPE_OBJECT = '[object Object]'
@@ -328,7 +358,7 @@ const TYPE_OBJECT = '[object Object]'
  * diff算法
  * @author 逍遥
  */
-const addDiff = function addDiff(
+util.addDiff = function addDiff(
     current = {},
     prev    = {},
     root    = '',
@@ -358,7 +388,7 @@ const addDiff = function addDiff(
     return result;
 }
 
-const nullDiff = function nullDiff(
+util.nullDiff = function nullDiff(
     current = {},
     prev    = {},
     root    = '',
@@ -386,7 +416,7 @@ const nullDiff = function nullDiff(
     return result;
 }
 
-const diff = function diff(current = {}, prev = {}) {
+util.diff = function diff(current = {}, prev = {}) {
     let result = {};
     addDiff(current, prev, '', result);
     nullDiff(current, prev, '', result);
@@ -398,7 +428,7 @@ const diff = function diff(current = {}, prev = {}) {
  * @param data
  * @return {any}
  */
-const deepClone = data => {
+util.deepClone = data => {
     if (typeof data === 'undefined' || typeof data !== 'object') {
         return data;
     }
@@ -420,7 +450,7 @@ const deepClone = data => {
  * @param name
  * @param type
  */
-const openMap = ({longitude = '', latitude = '', address = '', name = '', type = 'baidu'} = {}) => {
+util.openMap = ({longitude = '', latitude = '', address = '', name = '', type = 'baidu'} = {}) => {
     if (longitude === "" || latitude === "") {
         app.showToast('error', '地址错误');
         return;
@@ -449,7 +479,7 @@ const openMap = ({longitude = '', latitude = '', address = '', name = '', type =
  * 检查是否有保存图片权限,如果没有直接打开授权页
  * @return {Promise<any>}
  */
-const checkImgSetting = () => {
+util.checkImgSetting = () => {
     return new Promise((a, b) => {
         wx.getSetting({
             success(res) {
@@ -473,7 +503,7 @@ const checkImgSetting = () => {
  * @param url
  * @param callback
  */
-const downloadImg = (url, callback) => {
+util.downloadImg = (url, callback) => {
     if (url.indexOf('https') === -1) {
         url = url.replace(/http/ig, 'https');
     }
@@ -502,7 +532,7 @@ const downloadImg = (url, callback) => {
  * @param title
  * @param duration
  */
-const showToast = (type = 'loading', title = '拼命加载中', duration = 1500) => {
+util.showToast = (type = 'loading', title = '拼命加载中', duration = 1500) => {
     let options = {
         duration: type === 'loading' ? 1000000 : duration,
         title,
@@ -527,7 +557,7 @@ const showToast = (type = 'loading', title = '拼命加载中', duration = 1500)
  * 4. 当值为-1                    小程序获取定位权限可能超时或者什么
  * @return {Promise<any>}
  */
-const getLocationSet = () => {
+util.getLocationSet = () => {
     return new Promise((a, b) => {
         wx.getSetting({
             success(res) {
@@ -543,7 +573,7 @@ const getLocationSet = () => {
 /**
  * 更新app
  */
-const updateApp = () => {
+util.updateApp = () => {
     let updateManager = wx.getUpdateManager();
     updateManager.onCheckForUpdate(function (res) {
         // 请求完新版本信息的回调
@@ -573,7 +603,7 @@ const updateApp = () => {
 /**
  * 隐藏右上角分享
  */
-const hideShareMenu = () => {
+util.hideShareMenu = () => {
     wx.hideShareMenu();
 };
 
@@ -584,7 +614,7 @@ const hideShareMenu = () => {
  * @param oldValue
  * @return {{}}
  */
-const formatDataByDiff = (key, newValue, oldValue) => {
+util.formatDataByDiff = (key, newValue, oldValue) => {
     if (isArray(oldValue)) {
         return {[key]: newValue};
     }
@@ -613,7 +643,7 @@ const formatDataByDiff = (key, newValue, oldValue) => {
  * @param ak => 百度ak
  * @return {Promise<any>}
  */
-const getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
+util.getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
     return new Promise((a, b) => {
         wx.request({
             url    : 'https://api.map.baidu.com/geocoder/v2/?ak=' + ak + '&location=' + latitude + ',' + longitude + '&output=json',
@@ -641,7 +671,7 @@ const getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
  * @param callback
  * @return {Promise<any>}
  */
-const networkChangeEvent = callback => {
+util.networkChangeEvent = callback => {
     return new Promise((a, b) => {
         wx.onNetworkStatusChange(res => {
             // ['4g', '3g', 'wifi'].indexOf(res.networkType) === -1
@@ -672,7 +702,7 @@ const networkChangeEvent = callback => {
 /**
  * 隐藏toast
  */
-const hideToast = () => {
+util.hideToast = () => {
     wx.hideToast();
 };
 
@@ -680,7 +710,7 @@ const hideToast = () => {
  * 保存图片到本地
  * @return {Promise<void>}
  */
-const saveImageToAlbum = async ({currentTarget}) => {
+util.saveImageToAlbum = async ({currentTarget}) => {
     showToast('loading', '保存中..');
     // 没有权限会自动跳转 授权页面
     if (!await checkImgSetting()) {
@@ -706,7 +736,7 @@ const saveImageToAlbum = async ({currentTarget}) => {
  * 获取元素的宽高top之类的属性
  * @param {*} select
  */
-const querySelector = select => {
+util.querySelector = select => {
     let query = wx.createSelectorQuery();
     query.select(select).boundingClientRect();
     return new Promise((a, b) => {
@@ -720,32 +750,10 @@ const querySelector = select => {
  * 设置nav title
  * @param navTitle
  */
-const setNavTitle = navTitle => {
+util.setNavTitle = navTitle => {
     wx.setNavigationBarTitle({
         title: navTitle,
     });
 };
 
-module.exports = {
-    deepClone,
-    _typeOf,
-    diff,
-    deleteArrayKeys,
-    deleteKeys,
-    isArray,
-    arrFirst,
-    maybeMap,
-    checkArrayLength,
-    Maybe,
-    curry,
-    pipe,
-    compose,
-    setTitleBar,
-    getMonthHasDayCounts,
-    getDateDay,
-    storage,
-    _,
-    merge: _.merge,
-    tencent2baidu,
-    badiDu2Tencent,
-};
+module.exports = util;

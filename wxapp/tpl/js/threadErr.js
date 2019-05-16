@@ -1,4 +1,4 @@
-let {http, threadErr} = require('../../utils/http-thread');
+let {http, threadErr} = require('../../utils/thread');
 module.exports        = {
     data: {},
     mix : {
