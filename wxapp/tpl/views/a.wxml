@@ -1,5 +1,0 @@
-<wxs src="../../utils/util.wxs" module="util"/>
-<template name="a">
-    <view>{{ a.aaa }}</view>
-    <view> 我是不是a组件 {{ util.isTrue(a.b) }} </view>
-</template>

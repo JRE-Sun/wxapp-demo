@@ -1,34 +1,5 @@
-/**
- * 百度经纬度坐标转换腾讯坐标
- */
-var badiDu2Tencent = function (lat, lng) {
-    var x_pi  = 3.14159265358979324 * 3000.0 / 180.0;
-    var x     = lng - 0.0065, y = lat - 0.006;
-    var z     = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);
-    var theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * x_pi);
-    lng       = z * Math.cos(theta);
-    lat       = z * Math.sin(theta);
-    return {
-        lng: lng,
-        lat: lat
-    }
-};
-
-var isTrue = function (val) {
-    if (typeof val === 'undefined') {
-        return false;
-    }
-    if (typeof val === 'string' && val.length === 0) {
-        return false;
-    }
-    if (typeof val === 'array' && val.length === 0) {
-        return false;
-    }
-    return true;
-};
-
-
 module.exports = {
-    badiDu2Tencent       : badiDu2Tencent,
-    isTrue               : isTrue,
+    test: function () {
+        return 1;
+    }
 };

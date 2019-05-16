@@ -1,7 +1,2 @@
 <view class="index-page">
-<import src="../../tpl/views/test.wxml"/>
-<import src="../../tpl/views/a.wxml"/>
-
-<template is="test" data="{{ test }}" />
-<template is="a" data="{{ a }}" />
 </view>

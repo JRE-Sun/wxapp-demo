@@ -1,5 +1,6 @@
-let defaultConfig = require('./default');
+let openThreadErr = require('./config').http.config || false;
 let util          = require('./util');
+
 
 module.exports = {
     mergeConfig(tplUrlName) {
@@ -27,6 +28,12 @@ module.exports = {
     },
     runPage(setting, tplUrlName = []) {
         let mergeTplJs = {};
+        openThreadErr && tplUrlName.push('threadErr');
+        tplUrlName.push('default');
+        if (tplUrlName.length !== 0) {
+            mergeTplJs = this.mergeConfig(tplUrlName);
+        }
+
         if (tplUrlName.length !== 0) {
             mergeTplJs = this.mergeConfig(tplUrlName);
         }
@@ -47,11 +54,7 @@ module.exports = {
         if (setting.mix && setting.mix.__event) {
             setting.mix.__event = __event;
         }
-        setting = util.merge({}, defaultConfig, setting);
-        // 当前页面 分享按钮
-        if (setting.mix && setting.mix.share) {
-            setting = util.merge({}, require('./share'), setting);
-        }
+        setting = util.merge({}, require('./share'), setting);
         Page(setting);
     }
-};
+};  
