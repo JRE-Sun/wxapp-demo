@@ -23,9 +23,13 @@ module.exports = {
      */
     getPageData(key) {
         let value = this.data;
-        key.split('.').forEach(n => {
-            value = value[n];
-        });
+        try {
+            key.split('.').forEach(n => {
+                value = value[n];
+            });
+        } catch (e) {
+            value = void 0;
+        }
         return util.deepClone(value);
     },
 
@@ -137,31 +141,31 @@ module.exports = {
      * @param obj
      */
     setPageData(obj = {}) {
-        let diffObj = {};
-        obj         = util.deepClone(obj);
-        console.log(obj, 'setPageData');
-        Object.keys(obj).forEach(key => {
-            let newValue = obj[key];
-            let oldValue = this.data[key];
-            // page页面上没有 或者 老的值不是 数组或者json
-            if (typeof oldValue === 'undefined' || typeof oldValue !== 'object' || typeof newValue !== 'object') {
-                diffObj[`${key}`] = newValue;
-                return;
-            }
-            console.log(key, 'key');
-            let getDiff = util.formatDataByDiff(key, newValue, oldValue);
-            console.log('getDiff=>', getDiff);
-            if (!getDiff) {
-                diffObj[key] = false;
-            } else {
-                console.log(diffObj, getDiff, 'diffObj, getDiff');
-                diffObj = util.merge(diffObj, getDiff);
-            }
-            console.log('diffObj', diffObj);
-        });
-        if (Object.keys(diffObj).length === 0) return;
-        console.log(diffObj, '差异合并diffObj');
-        this.setData(diffObj);
+        // let diffObj = {};
+        // obj         = util.deepClone(obj);
+        // console.log(obj, 'setPageData');
+        // Object.keys(obj).forEach(key => {
+        //     let newValue = obj[key];
+        //     let oldValue = this.data[key];
+        //     // page页面上没有 或者 老的值不是 数组或者json
+        //     if (typeof oldValue === 'undefined' || typeof oldValue !== 'object' || typeof newValue !== 'object') {
+        //         diffObj[`${key}`] = newValue;
+        //         return;
+        //     }
+        //     console.log(key, 'key');
+        //     let getDiff = util.formatDataByDiff(key, newValue, oldValue);
+        //     console.log('getDiff=>', getDiff);
+        //     if (!getDiff) {
+        //         diffObj[key] = false;
+        //     } else {
+        //         console.log(diffObj, getDiff, 'diffObj, getDiff');
+        //         diffObj = util.merge(diffObj, getDiff);
+        //     }
+        //     console.log('diffObj', diffObj);
+        // });
+        // if (Object.keys(diffObj).length === 0) return;
+        // console.log(diffObj, '差异合并diffObj');
+        this.setData(obj);
     },
 
     /**
@@ -202,6 +206,7 @@ module.exports = {
         if (!key) return;
         try {
             delete app.store[key];
+            this.mergeStore();
         } catch (e) {
             console.error(`${this.route}页面onUnLoad时,删除key:${key}失败,出现错误`);
         }

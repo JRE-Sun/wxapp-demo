@@ -10,9 +10,12 @@ let setting = {
     mix : {
         isMergeStore: true, // 开启合并store
     },
+    storeDeleteCount() {
+        this.deleteStoreKey('count');
+    },
     storeAddClickCount() {
         let count = this.getPageData('$store.count');
-        console.error(count,'count')
+        console.error(count, 'count')
         if (!count) count = 0;
         count++;
         console.error(count);
