@@ -1,7 +1,7 @@
 module.exports = {
     data: {
         a: {
-            msg: '我是a组件数据',
+            msg: '我是a组件',
         },
     },
     mix : {
