@@ -9,7 +9,7 @@ module.exports    = {
         tplUrlName.forEach(n => {
             let tplJs = require(`../tpl/js/${n}`);
             tplJs.mix && runEventArray.push(tplJs.mix);
-            mergeTplJs = util.merge(mergeTplJs, tplJs);
+            mergeTplJs = util.merge({}, mergeTplJs, tplJs);
         });
         runEventArray.forEach(n => {
             let currRunEvent = n.__event;

@@ -5,7 +5,11 @@
     "pages/page/redirectPage",
     "pages/page/storePage",
     "pages/page/storePage2",
-    "pages/page/storePage3"
+    "pages/page/storePage3",
+    "pages/page/img",
+    "pages/page/toast",
+    "pages/page/share",
+    "pages/page/event"
   ],
   "window": {
     "backgroundTextStyle": "light",

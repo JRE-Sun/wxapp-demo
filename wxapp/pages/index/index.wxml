@@ -1,5 +1,10 @@
 <view class="page">
     <button class="page__item font-16"
+            data-query="page/event"
+            catch:tap="openPage">runEvent(核心)=>组件间通信
+    </button>
+
+    <button class="page__item font-16"
             data-query="page/newPage?a=1&&b=2"
             catch:tap="openPage">打开新页面,携带参数a=1,b=2
     </button>
@@ -11,7 +16,21 @@
             data-query="page/storePage"
             catch:tap="openPage">页面间$store共享
     </button>
-    <!--<image src="../../image/code.jpeg"-->
-    <!--mode="widthFix">-->
-    <!--</image>  -->
+    <button class="page__item font-16"
+            data-query="page/img"
+            catch:tap="openPage">图片相关方法
+    </button>
+    <button class="page__item font-16"
+            data-query="page/toast"
+            catch:tap="openPage">toast/back方法
+    </button>
+
+    <button class="page__item font-16"
+            data-query="page/share"
+            catch:tap="openPage">分享
+    </button>
+
+    <button class="page__item font-16"
+            catch:tap="openConsole">连续点击7次打开调试
+    </button>
 </view>

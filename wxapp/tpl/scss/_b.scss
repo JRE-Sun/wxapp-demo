@@ -1,0 +1,9 @@
+@charset "UTF-8";
+// 这里只需要引入变量
+@import "./style/var";
+
+.b-tpl {
+    .page__item{
+        color: #FFF;
+    }
+}

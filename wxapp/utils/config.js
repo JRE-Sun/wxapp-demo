@@ -6,6 +6,11 @@ module.exports = {
 
     apk: '', // 百度apk等等...
 
+    share: {
+        title: 'wxapp分享', // 默认分享标题
+        img  : 'dfghjkl', // 默认分享图
+    },
+
     http: { // 配置thread.js => http => 以下所有参数都为选填
         baseURL      : '', // 所有请求自动增加的前缀
         maxNum       : 5, // 请求的最大并发数

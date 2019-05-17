@@ -10,7 +10,6 @@ module.exports = {
         consoleCount: 0, // 是否打开调试点击次数,连续点击7次即可打开调试
         isMergeStore: false, // 是否合并 app.store 到页面data里面 => 为了页面上能够访问显示
         goBackTimer : null, // 页面加载失败,goBack方法的timer
-        share       : true, // 默认页面能够分享
         __event     : {
             pageOnError: ['pageSendErrLog']
         }
@@ -194,7 +193,7 @@ module.exports = {
     setStore(obj) {
         if (!this.checkedStore()) return;
         // 设置 Store
-        app.store = util.merge(app.store, obj);
+        app.store = util.merge({},app.store, obj);
         this.mergeStore();
     },
 
@@ -230,7 +229,7 @@ module.exports = {
      */
     updateMixData(key, value) {
         let mixData   = this.mix[key] || {};
-        this.mix[key] = util.merge(mixData, value);
+        this.mix[key] = util.merge({},mixData, value);
     },
 
     /**
@@ -239,7 +238,7 @@ module.exports = {
     updateTplData(name, value) {
         let currTplData = this.data[name] || {};
         let tplData     = {};
-        tplData[name]   = util.merge(currTplData, value);
+        tplData[name]   = util.merge({},currTplData, value);
         this.setData(tplData);
     },
 
@@ -249,24 +248,6 @@ module.exports = {
      */
     onLoadShared(options) {
         // 分享进来
-    },
-
-    /**
-     * 加载图片,用于canvas画图
-     * @param imgPath
-     * @return {Promise<any>}
-     */
-    loadImg(imgPath) {
-        return new Promise((a, b) => {
-            wx.downloadFile({
-                url    : imgPath,
-                success: function (res) {
-                    if (res.statusCode === 200) {
-                        a(res.tempFilePath);
-                    }
-                }
-            });
-        });
     },
 
     /**

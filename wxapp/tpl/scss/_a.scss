@@ -1,0 +1,10 @@
+@charset "UTF-8";
+// 这里只需要引入变量
+@import "./style/var";
+
+.tpl-a {
+    .page__item {
+        color: #FFF;
+        background: blue;
+    }
+}

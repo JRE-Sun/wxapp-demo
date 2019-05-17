@@ -6,6 +6,10 @@
 @import "./style/fixed";
 @import "./style/position";
 @import "./style/margin";
+// a 组件scss
+@import "./a";
+// b 组件scss
+@import "./b";
 
 image {
     margin: 0 auto;
@@ -15,6 +19,7 @@ img, view, swiper, swiper-item, page, text {
     box-sizing: border-box;
 }
 
+// 页面公有样式 page__item
 .page__item {
     letter-spacing: rpx(.8);
     padding: rpx(10) 0;

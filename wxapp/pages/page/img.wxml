@@ -1,0 +1,35 @@
+<view>演示图片:加载完成后才显示,要不然在小程序里面会拉伸拉长在变回来</view>
+<image src="http://5b0988e595225.cdn.sohucs.com/images/20170731/00f94b5eb60d4a97a64bab6105421a12.jpeg"
+       data-load-key="isImgLoad"
+       bindload="defaultLoadImgEvent"
+       mode="widthFix"
+       style="width:100%;display:block;visibility:{{ !isImgLoad ? 'hidden' : 'visible' }};position:{{ !isImgLoad ? 'absolute' : 'relative' }}">
+</image>
+<view>我是图片下的文字</view>
+
+<image wx:for="{{ imgList }}"
+       wx:key="{{ item }}"
+       catch:tap="previewImages"
+       data-preview-urls="{{ imgList }}"
+       data-preview-url="{{ item }}"
+       src="{{ item }}">
+</image>
+
+
+<view>
+下载彭总美图 : 内存里的地址 {{ downloadImgPath }}
+</view>
+
+<button class="page__item font-16"
+        data-url="http://5b0988e595225.cdn.sohucs.com/images/20170731/00f94b5eb60d4a97a64bab6105421a12.jpeg"
+        catch:tap="downloadImgs">下载彭总美图(记得打开不检验域名)
+</button>
+
+
+<button class="page__item font-16"
+        data-url="http://5b0988e595225.cdn.sohucs.com/images/20170731/00f94b5eb60d4a97a64bab6105421a12.jpeg"
+        catch:tap="saveImg">保存彭总美图到相册
+</button>
+
+
+

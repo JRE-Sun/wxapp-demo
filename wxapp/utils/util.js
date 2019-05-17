@@ -316,7 +316,7 @@ Maybe.prototype.isNothing = function () {
 };
 
 Maybe.prototype.join = function () {
-    return this.isNothing() ? Maybe.of(null) : this.val;
+    return this.isNothing() ? null : this.val;
 };
 
 Maybe.prototype.value = function () {
@@ -333,9 +333,81 @@ Maybe.prototype.chain = function (fn) {
 
 util.Maybe = Maybe;
 
+
 util._typeOf = function (val) {
     return Object.prototype.toString.call(val)
 }
+
+util.jsonString = data => {
+    try {
+        if (util.isString(data)) {
+            data = JSON.parse(data);
+        }
+        data = JSON.stringify(data);
+    } catch (e) {
+        console.error('util.jsonString参数错误,必须为json对象或者json字符串');
+        data = JSON.stringify({});
+    }
+    return data;
+};
+
+
+/**
+ * 初始化分享
+ * @param img
+ * @param title
+ * @param insert
+ * @param track
+ * @param path
+ * @param query
+ * @return {{imageUrl: *, title: *}}
+ */
+util.initShareOptions = ({img, title, insert, track, path, query}) => {
+    let shareOption = {
+        imageUrl: img,
+        title   : title
+    };
+    let param       = false;
+    // 插入 特定 前缀页
+    if (insert) {
+        if (track) {
+            // 有track
+            param = `?track=${track}&&redirect=${path}&&params=${query}`;
+            console.error(param, '插入 特定 前缀页---有track');
+        } else {
+            // 无
+            param = `?redirect=${path}&&params=${query}`;
+            console.error(param, '插入 特定 前缀页---无track');
+        }
+        shareOption.path = `/pages/${insert}${param}`;
+        console.error('最后转发的全部路径:', shareOption);
+        return shareOption;
+    }
+    // 不插 前缀页
+
+    if (track) {
+        // 有track
+        param = `?params=${query}&&track=${track}`;
+        console.error(param, '不插 前缀页---有track');
+    } else {
+        // 无
+        param = `?params=${query}`;
+        console.error(param, '不插 前缀页---无track');
+    }
+    shareOption.path = `/${path}${param}`;
+    console.error('最后转发的全部路径:', shareOption);
+    return shareOption;
+};
+
+
+util.isObject = val => {
+    return util._typeOf(val).search('Object') > -1;
+};
+
+util.isString = val => {
+    return util._typeOf(val).search('String') > -1;
+};
+
 
 util.isArray          = arr => {
     return util._typeOf(arr).search('Array') > -1;
@@ -419,7 +491,7 @@ util.nullDiff = function nullDiff(
 util.diff = function diff(current = {}, prev = {}) {
     let result = {};
     util.addDiff(current, prev, '', result);
-    util. nullDiff(current, prev, '', result);
+    util.nullDiff(current, prev, '', result);
     return result;
 };
 
@@ -452,7 +524,7 @@ util.deepClone = data => {
  */
 util.openMap = ({longitude = '', latitude = '', address = '', name = '', type = 'baidu'} = {}) => {
     if (longitude === "" || latitude === "") {
-        app.showToast('error', '地址错误');
+        util.showToast('error', '地址错误');
         return;
     }
     let shopLocation = {};
@@ -608,6 +680,13 @@ util.hideShareMenu = () => {
 };
 
 /**
+ * 显示右上角分享
+ */
+util.showShareMenu = () => {
+    wx.showShareMenu();
+};
+
+/**
  * 通过diff,并且格式化数据,生成setData能用的对象
  * @param key
  * @param newValue
@@ -634,7 +713,6 @@ util.formatDataByDiff = (key, newValue, oldValue) => {
     });
     return diffObj;
 };
-
 
 /**
  * 获取当前定位城市信息
@@ -710,24 +788,24 @@ util.hideToast = () => {
  * 保存图片到本地
  * @return {Promise<void>}
  */
-util.saveImageToAlbum = async ({currentTarget}) => {
-    showToast('loading', '保存中..');
+util.saveImageToAlbum = async (path) => {
+    util.showToast('loading', '保存中..');
     // 没有权限会自动跳转 授权页面
-    if (!await checkImgSetting()) {
-        hideToast();
+    if (!await util.checkImgSetting()) {
+        util.hideToast();
         return;
     }
     // 获取权限成功
     wx.saveImageToPhotosAlbum({
-        filePath: currentTarget.dataset.filePath,
+        filePath: path,
         success(res) {
             console.log('保存成功', res);
-            app.showToast('success', '保存成功');
+            util.showToast('success', '保存成功');
         },
         fail(res) {
             console.log('保存失败', res);
-            self.getImgSetting();
-            app.showToast('error', '保存失败');
+            util.checkImgSetting();
+            util.showToast('error', '保存失败');
         }
     });
 };

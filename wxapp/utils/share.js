@@ -1,7 +1,9 @@
 /**
  * 分享
  */
-let app = getApp();
+let app                  = getApp();
+let {share: configShare} = require('./config');
+let util                 = require('./util');
 
 module.exports = {
 
@@ -10,85 +12,59 @@ module.exports = {
      * @param title
      * @param img
      */
-    setShareData({title = '好服务都在妈妈身边', img = `${this.data.mamaImgUrl}logo.png`} = {}) {
-        console.log(title, '转发文字');
-        this.mix.shareTitle = title;
-        this.mix.shareImage = img;
+    setShareData(options) {
+        options        = util.merge({}, {
+            title: configShare.title,
+            img  : configShare.img,
+            path : this.route,
+            query: this.options
+        }, options);
+        this.mix.share = {};
+        Object.keys(options).forEach(n => {
+            this.mix.share[n] = options[n];
+        });
+        console.log(`${this.route}设置setShareData后的this.mix.share=`, this.mix.share);
     },
 
     /**
      * 用户点击右上角分享
      */
     onShareAppMessage: function ({target = null}) {
-        console.error(target, 'share target');
-        let shareOption = {
-            imageUrl: this.mix.shareImage,
-            title   : this.mix.shareTitle
+        let share  = util.Maybe.of(this.mix.share);
+        let chain  = (maybe, key) => {
+            return maybe.chain(data => {
+                return data[key];
+            })
         };
-        // 分享追踪消息
-        let trackData   = this.getTrackData();
-        let trackQuery  = {
-            mchId   : trackData.mchId || '',
-            userId  : trackData.userId || '',
-            inviteId: this.getAppUserInfo('uid')
-        };
+        let insert = chain(share, 'insert'); // 页面分享是否 需要插入前缀 路径
+        let title  = chain(share, 'title'); // 分享标题
+        let img    = chain(share, 'img'); // 分享图
+        let path   = chain(share, 'path'); // 分享路径
+        let query  = share.map(data => data.query).chain(util.jsonString) || util.jsonString({});
+        // 分享参数, 分享路径和分享参数拼接在一起最后会形成 path-query=>page/index/home?b=1
+        let track  = share.map(data => data.track).chain(util.jsonString) || false;
         // target 为真则是页面禁止分享,通过点击的button
         // target 为null,则是普通的转发
-        let currPage = app.getCurrPagePath();
-        let route    = currPage.route;
-        let dataset  = this.resultName(target, 'dataset');
-
-        let shareRoute  = this.resultName(dataset, 'shareRoute');
-        let insertIndex = this.resultName(dataset, 'insertIndex');
-        insertIndex     = typeof insertIndex === 'boolean' ? insertIndex : (insertIndex === 'true');
-        let shareQuery  = this.resultName(dataset, 'shareQuery');
-        let shareTitle  = this.resultName(dataset, 'shareTitle');
-        let shareImg    = this.resultName(dataset, 'shareImg');
-        let type        = this.resultName(dataset, 'type');
-        // 普通转发
-        if (!target || (type && type === 'normal')) {
-            // 1.转发首页
-            if (route === 'pages/index/index') {
-                shareOption.path = '/pages/index/index?trackData=' + JSON.stringify(trackQuery);
-                console.error(shareOption, '转发首页');
-                return shareOption;
-            }
-            // 2.转发非首页
-            shareOption.path = '/pages/index/index?trackData=' + JSON.stringify(trackQuery) + '&&redirect=' + route + '&&params=' + JSON.stringify(currPage.options);
-            console.error(shareOption, '正常转发非首页');
-            return shareOption;
+        let dataset   = util.Maybe.of(target).map(data => data.dataset);
+        let shareType = chain(dataset, 'shareType');
+        // this.mix.shareTitle;
+        // 普通转发 => 两种,右上角转发/点击button转发
+        if (!target || (shareType && shareType === 'normal')) {
+            return util.initShareOptions({img, title, insert, track, path, query});
         }
-
-        console.error(shareQuery);
-        // 通过点击 button
-        shareQuery  = shareQuery ? JSON.parse(shareQuery) : {};
-        shareOption = {
-            imageUrl: shareImg || this.mix.shareImage || false,
-            title   : shareTitle || this.mix.shareTitle || '好服务都在妈妈身边'
-        };
-        // 转发当前页,不插入首页
-        if (shareRoute === route && !insertIndex) {
-            let currOptions  = shareQuery ? shareQuery : currPage.options;
-            let shareOptions = Object.keys(currOptions).map(key => {
-                return key + '=' + currOptions[key];
-            });
-            shareOption.path = '/' + route + '?' + shareOptions.join('&&');
-            console.error(shareOption, '点击按钮转发当前页 不插入首页');
-            return shareOption;
-        }
-        // 转发非当前页
-        // 插入首页
-        if (insertIndex) {
-            shareOption.path = '/pages/index/index?trackData=' + JSON.stringify(trackQuery) + '&&redirect=' + shareRoute + '&&params=' + JSON.stringify(shareQuery);
-            console.error(shareOption, '点击按钮 插入首页转发');
-            return shareOption;
-        }
-        // 不插入首页
-        let shareOptions = Object.keys(shareQuery).map(key => {
-            return key + '=' + shareQuery[key];
+        let sharePath   = chain(dataset, 'sharePath');
+        let shareInsert = chain(dataset, 'shareInsert');
+        let shareTitle  = chain(dataset, 'shareTitle');
+        let shareImg    = chain(dataset, 'shareImg');
+        let shareTrack  = dataset.map(data => data.shareTrack).chain(util.jsonString) || false;
+        let shareQuery  = dataset.map(data => data.shareQuery).chain(util.jsonString) || util.jsonString({});
+        return util.initShareOptions({
+            img   : shareImg,
+            title : shareTitle,
+            insert: shareInsert,
+            track : shareTrack,
+            path  : sharePath,
+            query : shareQuery
         });
-        shareOption.path = '/' + shareRoute + '?' + shareOptions.join('&&');
-        console.error(shareOption, '点击按钮 不插入首页转发');
-        return shareOption;
     }
 };
