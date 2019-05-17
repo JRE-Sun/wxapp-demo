@@ -6,6 +6,10 @@ module.exports = {
 
     apk: '', // 百度apk等等...
 
+    host1: 'http://www.baidu.com/', // host1-api.js 所有接口的前缀url
+
+    host2: 'http://www.souhu.com/', // host2-api.js 所有接口的前缀url
+
     share: {
         title: 'wxapp分享', // 默认分享标题
         img  : 'dfghjkl', // 默认分享图
