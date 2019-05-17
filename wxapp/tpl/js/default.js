@@ -140,6 +140,7 @@ module.exports = {
      * @param obj
      */
     setPageData(obj = {}) {
+        // todo 待解决合并数据通过 diff => 失败一次了
         // let diffObj = {};
         // obj         = util.deepClone(obj);
         // console.log(obj, 'setPageData');
@@ -193,7 +194,7 @@ module.exports = {
     setStore(obj) {
         if (!this.checkedStore()) return;
         // 设置 Store
-        app.store = util.merge({},app.store, obj);
+        app.store = util.merge({}, app.store, obj);
         this.mergeStore();
     },
 
@@ -229,7 +230,7 @@ module.exports = {
      */
     updateMixData(key, value) {
         let mixData   = this.mix[key] || {};
-        this.mix[key] = util.merge({},mixData, value);
+        this.mix[key] = util.merge({}, mixData, value);
     },
 
     /**
@@ -238,7 +239,7 @@ module.exports = {
     updateTplData(name, value) {
         let currTplData = this.data[name] || {};
         let tplData     = {};
-        tplData[name]   = util.merge({},currTplData, value);
+        tplData[name]   = util.merge({}, currTplData, value);
         this.setData(tplData);
     },
 
