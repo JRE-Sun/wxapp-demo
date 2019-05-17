@@ -3,25 +3,25 @@
 }
 
 .clear-20 {
-    height: rpx(20);
+    height: rpx(40);
 }
 
 .clear-10, .height-10 {
-    height: rpx(10);
+    height: rpx(20);
 }
 
 .clear-8, .height-8 {
-    height: rpx(8);
+    height: rpx(16);
 }
 
 .clear-6, .height-6 {
-    height: rpx(6);
+    height: rpx(12);
 }
 
 .clear-line {
     text-align: center;
     overflow: hidden;
-    padding: rpx(7) 0 rpx(7) 0;
+    padding: rpx(14) 0 rpx(14) 0;
     text {
         display: inline-block;
         position: relative;
@@ -34,11 +34,11 @@
             position: absolute;
         }
         &:after {
-            left: rpx(-10);
+            left: rpx(-20);
             transform: translate(-100%, -50%) scaleY(.5);
         }
         &:before {
-            right: rpx(-10);
+            right: rpx(-20);
             transform: translate(100%, -50%) scaleY(.5);
         }
     }
