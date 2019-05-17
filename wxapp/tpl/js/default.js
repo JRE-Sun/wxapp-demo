@@ -7,6 +7,8 @@ let app           = getApp();
 module.exports = {
     data: {},
     mix : {
+        redirect    : false, // 页面是否需要重定向
+        isRun       : false, // 判断是否正常走完onLoad和onShow
         consoleCount: 0, // 是否打开调试点击次数,连续点击7次即可打开调试
         isMergeStore: false, // 是否合并 app.store 到页面data里面 => 为了页面上能够访问显示
         goBackTimer : null, // 页面加载失败,goBack方法的timer
@@ -130,8 +132,15 @@ module.exports = {
      * 生命周期函数--监听页面显示
      */
     onShow() {
-        this.mergeStore();
         console.log('onShow');
+        if (this.checkedRedirect()) return;
+        this.mergeStore();
+        if (!this.mix.isRedirect && !this.mix.isRun) {
+            this.runEvent('pageOnLoad');
+            this.runEvent('pageOnShow');
+            this.mix.isRun = true;
+            return;
+        }
         this.runEvent('pageOnShow');
     },
 
@@ -213,12 +222,21 @@ module.exports = {
     },
 
     /**
+     * 检查是否需要重定向到新页面
+     */
+    checkedRedirect() {
+        return this.mix.hasOwnProperty('redirect') ? this.mix.redirect : false;
+    },
+
+    /**
      * 生命周期函数--监听页面加载
      */
     onLoad(options) {
         this.mergeStore();
-        console.log('onLoad', options);
+        console.log('onLoad', this.route, options);
         this.onLoadShared(options);
+        // 当需要重定向 直接 截断
+        if (this.checkedRedirect()) return;
         this.runEvent('pageOnLoad', options);
         openThreadErr && this.pageSendErrLog();
     },
@@ -243,12 +261,48 @@ module.exports = {
         this.setData(tplData);
     },
 
+    initRedirectData(options) {
+        if (!options.hasOwnProperty('redirect')) return;
+        this.mix.redirect = true;
+        // 分享进来
+        let queryStr      = '';
+        let queryJson     = {};
+        if (options.params) {
+            queryJson = JSON.parse(options.params);
+            for (let key in queryJson) {
+                queryStr = queryStr + key + '=' + queryJson[key] + '&&';
+            }
+            queryStr = queryStr.substr(0, queryStr.length - 2);
+        }
+        console.log('/' + options.redirect + (queryStr !== '' ? '?' + queryStr : ''), '即将打开的页面路径');
+        setTimeout(() => {
+            // 打开新页面前,删除当前页redirect
+            delete this.options.redirect;
+            this.mix.redirect = false;
+        }, 100);
+        wx.navigateTo({
+            url: '/' + options.redirect + (queryStr !== '' ? '?' + queryStr : '')
+        });
+    },
+
+    /**
+     * 初始化track数据
+     * @param options
+     */
+    initTrackData(options) {
+        if (!options.track) return;
+        let track = JSON.parse(options.track);
+        delete this.options.track;
+        console.error(track, this.route, 'track数据');
+    },
+
     /**
      * 通过分享进来
      * @param options
      */
     onLoadShared(options) {
-        // 分享进来
+        this.initTrackData(options);
+        this.initRedirectData(options);
     },
 
     /**

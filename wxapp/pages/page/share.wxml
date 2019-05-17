@@ -7,14 +7,14 @@
             catch:tap="changeRightTopShare">右上角转发其他页面
     </button>
     <button class="page__item font-16"
-            data-insert="index/home"
+            data-insert="page/storePage"
             catch:tap="changeRightTopShare">右上角转发本页,并且前面插入pages/index/home
     </button>
     <button class="page__item font-16"
             data-img="http://5b0988e595225.cdn.sohucs.com/images/20170731/00f94b5eb60d4a97a64bab6105421a12.jpeg"
-            data-insert="index/home"
+            data-insert="page/storePage"
             data-query='{"a":1}'
-            data-path="pages/page/storePage"
+            data-path="pages/page/storePage2"
             catch:tap="changeRightTopShare">右上角转发其他页面,并且前面插入pages/index/home
     </button>
 
@@ -38,18 +38,18 @@
     </button>
 
     <button class="page__item font-16"
-            data-share-insert="index/home"
+            data-share-insert="page/storePage"
             data-share-title="我是当前页面"
-            data-share-path="pages/page/storePage"
+            data-share-path="pages/page/storePage2"
             data-share-query='{"a":19}'
             open-type="share">按钮转发=>并且前面插入pages/index/home
     </button>
 
     <button class="page__item font-16"
             data-share-img="http://5b0988e595225.cdn.sohucs.com/images/20170731/00f94b5eb60d4a97a64bab6105421a12.jpeg"
-            data-share-insert="index/home"
+            data-share-insert="page/storePage"
             data-share-title="我是其他页"
-            data-share-path="pages/page/storePage"
+            data-share-path="pages/page/storePage2"
             data-share-query='{"a":19}'
             data-share-track='{"yyy":4}'
             open-type="share">按钮转发=>其他页面,并且前面插入pages/index/home

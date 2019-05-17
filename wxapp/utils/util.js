@@ -333,7 +333,6 @@ Maybe.prototype.chain = function (fn) {
 
 util.Maybe = Maybe;
 
-
 util._typeOf = function (val) {
     return Object.prototype.toString.call(val)
 }
@@ -350,7 +349,6 @@ util.jsonString = data => {
     }
     return data;
 };
-
 
 /**
  * 初始化分享

@@ -30,17 +30,24 @@ module.exports = {
      * 用户点击右上角分享
      */
     onShareAppMessage: function ({target = null}) {
-        let share  = util.Maybe.of(this.mix.share);
-        let chain  = (maybe, key) => {
+        let share = util.Maybe.of(this.mix.share);
+        let chain = (maybe, key) => {
             return maybe.chain(data => {
                 return data[key];
             })
         };
+
+        let addShareToQuery = data => {
+            data       = JSON.parse(util.jsonString(data));
+            data.share = true;
+            return util.jsonString(data);
+        };
+
         let insert = chain(share, 'insert'); // 页面分享是否 需要插入前缀 路径
         let title  = chain(share, 'title'); // 分享标题
         let img    = chain(share, 'img'); // 分享图
         let path   = chain(share, 'path'); // 分享路径
-        let query  = share.map(data => data.query).chain(util.jsonString) || util.jsonString({});
+        let query  = share.map(data => data.query).chain(addShareToQuery) || util.jsonString({share: true});
         // 分享参数, 分享路径和分享参数拼接在一起最后会形成 path-query=>page/index/home?b=1
         let track  = share.map(data => data.track).chain(util.jsonString) || false;
         // target 为真则是页面禁止分享,通过点击的button
@@ -57,7 +64,7 @@ module.exports = {
         let shareTitle  = chain(dataset, 'shareTitle');
         let shareImg    = chain(dataset, 'shareImg');
         let shareTrack  = dataset.map(data => data.shareTrack).chain(util.jsonString) || false;
-        let shareQuery  = dataset.map(data => data.shareQuery).chain(util.jsonString) || util.jsonString({});
+        let shareQuery  = dataset.map(data => data.shareQuery).chain(addShareToQuery) || util.jsonString({share: true});
         return util.initShareOptions({
             img   : shareImg,
             title : shareTitle,

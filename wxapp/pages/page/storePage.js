@@ -4,15 +4,25 @@ let regeneratorRuntime = require('../../utils/runtime-module');
 
 let setting = {
     data: {
-        options: false,
+        showDom: false,
     },
     // mix 是页面混合数据,里面存放不需要在页面上渲染的数据
     mix : {
         isMergeStore: true, // 开启合并store
+        __event     : {
+            pageOnLoad: ['storeOnLoad']
+        }
+    },
+    storeOnLoad() {
+        setTimeout(() => {
+            this.setPageData({
+                showDom: true,
+            })
+        }, 3000);
     },
     storeAddClickCount() {
         let count = this.getPageData('$store.count');
-        console.error(count,'count')
+        console.error(count, 'count')
         if (!count) count = 0;
         count++;
         console.error(count);
