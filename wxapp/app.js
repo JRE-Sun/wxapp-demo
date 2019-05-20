@@ -15,7 +15,9 @@ App({
         console.error(scene, 'app onshow options')
     },
 
-    globalData: {},
+    globalData: {
+        isLogin: false,
+    },
 
     store: {}, // 页面间传参,或者所谓的全局缓存
 })

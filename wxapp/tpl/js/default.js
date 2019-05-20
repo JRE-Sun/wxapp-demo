@@ -1,16 +1,18 @@
-let util          = require('../../utils/util');
-let openThreadErr = require('../../utils/config').http.config || false;
-let app           = getApp();
+let util               = require('../../utils/util');
+let openThreadErr      = require('../../utils/config').http.config || false;
+let regeneratorRuntime = require('../../utils/runtime-module');
+let app                = getApp();
 // 这是每个小程序页面,共有的配置,最后回自动合并到setting中
 
 // 每个页面都会有的共有方法
 module.exports = {
     data: {},
     mix : {
-        redirect    : false, // 页面是否需要重定向
+        openingPage : false, // openingPage 通过转发进来,并且需要打开新页面,正在打开中... true为正在打开
+        runOnLoad   : true, // 默认正在运行onLoad,运行完onLoad后才能执行onShow
         isRun       : false, // 判断是否正常走完onLoad和onShow
         consoleCount: 0, // 是否打开调试点击次数,连续点击7次即可打开调试
-        isMergeStore: false, // 是否合并 app.store 到页面data里面 => 为了页面上能够访问显示
+        isMergeStore: true, // 是否合并 app.store 到页面data里面 => 为了页面上能够访问显示
         goBackTimer : null, // 页面加载失败,goBack方法的timer
         __event     : {
             pageOnError: ['pageSendErrLog']
@@ -129,22 +131,6 @@ module.exports = {
     },
 
     /**
-     * 生命周期函数--监听页面显示
-     */
-    onShow() {
-        console.log('onShow');
-        if (this.checkedRedirect()) return;
-        this.mergeStore();
-        if (!this.mix.isRedirect && !this.mix.isRun) {
-            this.runEvent('pageOnLoad');
-            this.runEvent('pageOnShow');
-            this.mix.isRun = true;
-            return;
-        }
-        this.runEvent('pageOnShow');
-    },
-
-    /**
      * 设置页面data
      * @param obj
      */
@@ -187,10 +173,24 @@ module.exports = {
         });
     },
 
+    getStore(key) {
+        if (!this.checkedStore()) return false;
+        let $store = this.data.$store;
+        let data   = '';
+        try {
+            key.split('.').forEach(n => {
+                data = $store[n];
+            });
+        } catch (e) {
+            data = void 0;
+        }
+        return data;
+    },
+
     checkedStore() {
         // 当禁止合并
         if (!this.mix.isMergeStore) {
-            console.log('当前页面禁止合并store变量!');
+            console.log(this.route, '当前页面禁止合并store变量!');
             return false;
         }
         return true;
@@ -228,17 +228,67 @@ module.exports = {
         return this.mix.hasOwnProperty('redirect') ? this.mix.redirect : false;
     },
 
+    initPage() {
+        console.log(this.mix, 'initPage', this.route, Date.now())
+        // console.log(this.mix.initPage,'initPage', this.route,Date.now(),'---')
+        this.mergeStore();
+        let redirect = () => {
+            this.mix.runOnLoad = false;
+            // 当需要重定向 直接 截断
+            if (this.checkedRedirect()) {
+                this.openRedirectPage();
+                return false;
+            }
+            return true;
+        };
+        return new Promise(async (a, b) => {
+            if (this.route === 'pages/page/share') {
+                a(redirect());
+                return;
+            }
+            if (this.onLoadBefore) {
+                this.onLoadBefore(data => {
+                    this.mix.runOnLoad = false;
+                    a(data && redirect());
+                })
+            } else {
+                this.mix.runOnLoad = false;
+                a(redirect())
+            }
+        })
+    },
+
+    /**
+     * 生命周期函数--监听页面显示
+     */
+    async onShow() {
+        // 如果当前正在运行onLoad直接退出onShow
+        if (this.mix.runOnLoad) return;
+        console.log(this.route, 'onShow');
+        if (!await this.initPage()) return;
+        // mix默认是没有redirect,如果有意味着上次进入该页面是转发,onLoad,onShow周期被截断
+        if (this.mix.hasOwnProperty('redirect') && !this.mix.isRun) {
+            this.runEvent('pageOnLoad');
+            this.runEvent('pageOnShow');
+            this.mix.isRun = true;
+            return;
+        }
+        this.runEvent('pageOnShow');
+        this.mix.isRun = true;
+    },
+
     /**
      * 生命周期函数--监听页面加载
      */
-    onLoad(options) {
-        this.mergeStore();
-        console.log('onLoad', this.route, options);
+    async onLoad(options) {
+        // 解析参数 设置对应mix上的key如redirect,track上
         this.onLoadShared(options);
-        // 当需要重定向 直接 截断
-        if (this.checkedRedirect()) return;
+        // 判断 进入页面是否需要其他逻辑,例如必须授权,必须定位等
+        if (!await this.initPage()) return;
+        console.log(this.route, 'onLoad', options);
         this.runEvent('pageOnLoad', options);
         openThreadErr && this.pageSendErrLog();
+        this.onShow();
     },
 
     /**
@@ -261,6 +311,21 @@ module.exports = {
         this.setData(tplData);
     },
 
+    openRedirectPage() {
+        if (this.mix.openingPage) return;
+        console.error(1, this.mix.redirect, typeof this.mix.redirect)
+        this.mix.openingPage = true;
+        setTimeout(() => {
+            // 打开新页面前,删除当前页redirect
+            delete this.options.redirect;
+            this.mix.redirect    = false;
+            this.mix.openingPage = false;
+        }, 100);
+        wx.navigateTo({
+            url: this.mix.redirect
+        });
+    },
+
     initRedirectData(options) {
         if (!options.hasOwnProperty('redirect')) return;
         this.mix.redirect = true;
@@ -275,14 +340,7 @@ module.exports = {
             queryStr = queryStr.substr(0, queryStr.length - 2);
         }
         console.log('/' + options.redirect + (queryStr !== '' ? '?' + queryStr : ''), '即将打开的页面路径');
-        setTimeout(() => {
-            // 打开新页面前,删除当前页redirect
-            delete this.options.redirect;
-            this.mix.redirect = false;
-        }, 100);
-        wx.navigateTo({
-            url: '/' + options.redirect + (queryStr !== '' ? '?' + queryStr : '')
-        });
+        this.mix.redirect = '/' + options.redirect + (queryStr !== '' ? '?' + queryStr : '');
     },
 
     /**

@@ -19,7 +19,7 @@
     </button>
 
     <button class="page__item font-16"
-            style="background:red;color:#fff"
+            style="background:red;color:#FFF"
             catch:tap="changeShareMenu">
         {{ shareMenu ? '关闭' : '打开' }}右上角转发
     </button>
@@ -53,5 +53,9 @@
             data-share-query='{"a":19}'
             data-share-track='{"yyy":4}'
             open-type="share">按钮转发=>其他页面,并且前面插入pages/index/home
+    </button>
+
+    <button class="page__item font-16"
+            catch:tap="changeIsLogin">登录
     </button>
 </view>

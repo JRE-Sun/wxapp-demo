@@ -13,4 +13,5 @@
             data-query="page/storePage2"
             catch:tap="openPage">打开新页面
     </button>
+    {{ $store.isLogin }}
 </block>

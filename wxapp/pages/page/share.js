@@ -31,6 +31,7 @@ let setting            = {
                 goodsId: 2
             }
         });
+        console.log(this.data.shareMenu, 'shareMenu')
     },
     changeRightTopShare({currentTarget}) {
         let dataset = currentTarget.dataset;
@@ -49,6 +50,11 @@ let setting            = {
         }
         util.hideShareMenu();
     },
+
+    changeIsLogin() {
+        this.setStore({isLogin: true,});
+        console.log('share 页面 isLogin', true, '新页面登陆成功');
+    }
 };
 
 // 如果页面不需要其他组件,直接 xapp.runPage(setting);
