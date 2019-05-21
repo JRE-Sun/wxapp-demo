@@ -2,19 +2,19 @@
  * 拥有ajax请求并发管理的http模块
  * @type {*|global.regeneratorRuntime}
  */
-let regeneratorRuntime = require('./runtime-module');
-let miment             = require('./miment');
-let {storage}          = require('./util');
-let app                = getApp();
-let config             = require('./config');
+import regeneratorRuntime from './runtime-module';
+import {storage} from './util';
+import miment from './miment';
+import config from './config';
 
+let app           = getApp();
 let openThreadErr = config.http.openThreadErr || false; // 是否发送错误日志
 let log           = config.http.log || false; // 是否打印请求console
 
 /**
  * 错误日志
  */
-const threadErr = {
+export const threadErr = {
     add(method, msg, data = '') {
         let errLogList = this.getErrLogList();
         let isHasLog   = false;
@@ -103,7 +103,7 @@ const threadErr = {
     }
 };
 
-let http = {
+export const http = {
     config  : {
         maxNum   : config.http.maxNum || 5, // 最大并发数
         timeout  : config.http.timeout || 14000, // 14s
@@ -363,9 +363,4 @@ let http = {
             }, this.config.timeout);
         });
     },
-};
-
-module.exports = {
-    http,
-    threadErr
 };

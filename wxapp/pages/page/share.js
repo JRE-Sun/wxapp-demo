@@ -1,8 +1,9 @@
-let xapp               = require('../../utils/xapp');
+import xapp from '../../utils/xapp';
 // 让小程序支持es7 async/asait,如果不用可以不引入
-let regeneratorRuntime = require('../../utils/runtime-module');
-let util               = require('../../utils/util');
-let setting            = {
+import regeneratorRuntime from '../../utils/runtime-module';
+import {showShareMenu, hideShareMenu} from '../../utils/util' ;
+
+let setting = {
     data: {
         shareMenu: true,
     },

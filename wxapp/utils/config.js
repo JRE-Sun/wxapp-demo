@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 
     log: true, // true => 打印log信息, false => 关闭log信息
 

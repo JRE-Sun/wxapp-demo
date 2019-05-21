@@ -1,5 +1,6 @@
-let {http, threadErr} = require('../../utils/thread');
-module.exports        = {
+import {http, threadErr} from '../../utils/thread';
+
+export default {
     data: {},
     mix : {
         pageErrTimer: null, // 错误日志timer

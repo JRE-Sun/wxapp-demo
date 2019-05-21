@@ -1,15 +1,17 @@
-let openThreadErr = require('./config').http.openThreadErr || false;
-let util          = require('./util');
-module.exports    = {
+import config from './config';
+import {merge, _, getImportObjByRequire} from './util';
+
+let openThreadErr = config.http.config || false;
+export default {
     mergeConfig(tplUrlName) {
         let runEventArray = [];
         let mergeTplJs    = {};
         let runEvent      = {};
         // 根据组件名称 合并组件
         tplUrlName.forEach(n => {
-            let tplJs = require(`../tpl/js/${n}`);
+            let tplJs = getImportObjByRequire(`../tpl/js/${n}`);
             tplJs.mix && runEventArray.push(tplJs.mix);
-            mergeTplJs = util.merge({}, mergeTplJs, tplJs);
+            mergeTplJs = merge({}, mergeTplJs, tplJs);
         });
         runEventArray.forEach(n => {
             let currRunEvent = n.__event;
@@ -43,16 +45,16 @@ module.exports    = {
         if (setting.mix) {
             settingRunEvent = setting.mix.__event || {};
         }
-        let __event = util._.mergeWith(mergeRunEvent, settingRunEvent, function (a, b) {
-            if (util._.isArray(a) && util._.isArray(b)) {
+        let __event = _.mergeWith(mergeRunEvent, settingRunEvent, function (a, b) {
+            if (_.isArray(a) && _.isArray(b)) {
                 return a.concat(b);
             }
         });
-        setting     = util.merge({}, mergeTplJs, setting);
+        setting     = merge({}, mergeTplJs, setting);
         if (setting.mix && setting.mix.__event) {
             setting.mix.__event = __event;
         }
-        setting = util.merge({}, require('./share'), setting);
+        setting = merge({}, getImportObjByRequire(`./share`), setting);
         Page(setting);
     }
 };  

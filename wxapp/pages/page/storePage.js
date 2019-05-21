@@ -1,9 +1,10 @@
-let xapp               = require('../../utils/xapp');
+import xapp from '../../utils/xapp';
 // 让小程序支持es7 async/asait,如果不用可以不引入
-let regeneratorRuntime = require('../../utils/runtime-module');
-let app                = getApp();
-let util               = require('../../utils/util');
-let setting            = {
+import regeneratorRuntime from '../../utils/runtime-module';
+import {showToast,hideToast} from '../../utils/util';
+
+let app     = getApp();
+let setting = {
     data: {
         showDom: false,
     },
@@ -41,18 +42,52 @@ let setting            = {
      * @param callback
      */
     async onLoadBefore(callback) {
+        let self = this;
         if (this.getStore('isLogin')) {
             console.log(this.route, this.getStore('isLogin'));
             callback(true);
             return;
         }
-        util.showToast('loading', '跳转登录中');
+        // if (await util.getLocationSet() === false) {
+        //     console.error('用户拒绝定位');
+        //     self.setStore({
+        //         isLogin: '用户拒绝定位',
+        //     });
+        //     callback(true);
+        //     return;
+        // }
+        // util.showToast('loading', '定位中');
+        // // 模拟异步的 登录 / 定位 获取城市
+        // wx.getLocation({
+        //     type: 'wgs84',
+        //     success(res) {
+        //         util.hideToast();
+        //         self.setStore({
+        //             isLogin: JSON.stringify(res),
+        //         });
+        //         callback(true);
+        //     },
+        //     fail() {
+        //         util.hideToast();
+        //         self.setStore({
+        //             isLogin: '获取定位失败',
+        //         });
+        //         callback(true);
+        //     }
+        // })
+
+        if (this.getStore('isLogin')) {
+            console.log(this.route, this.getStore('isLogin'));
+            callback(true);
+            return;
+        }
+        showToast('loading', '跳转登录中');
         // 模拟异步的 登录 / 定位 获取城市
         console.log('模拟异步的 登录 / 定位 获取城市')
         wx.navigateTo({
             url: `/pages/page/share`
         })
-        util.hideToast();
+        hideToast();
         callback(false);
     },
 };

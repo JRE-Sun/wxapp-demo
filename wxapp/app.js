@@ -1,4 +1,5 @@
-let util = require('./utils/util');
+// let util = require('./utils/util');
+import {checkDebug} from './utils/util'
 //app.js
 App({
 
@@ -8,7 +9,7 @@ App({
      */
     onLaunch: function (e) {
         // 检查是否为Debug模式,来动态显示隐藏console
-        util.checkDebug();
+        checkDebug();
     },
 
     onShow({scene}) {

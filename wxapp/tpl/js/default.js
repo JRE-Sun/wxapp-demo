@@ -1,11 +1,12 @@
-let util               = require('../../utils/util');
-let openThreadErr      = require('../../utils/config').http.config || false;
-let regeneratorRuntime = require('../../utils/runtime-module');
-let app                = getApp();
-// 这是每个小程序页面,共有的配置,最后回自动合并到setting中
+import {deepClone, showToast, merge, storage} from '../../utils/util';
+import regeneratorRuntime from '../../utils/runtime-module';
+import config from '../../utils/config';
 
+let app           = getApp();
+let openThreadErr = config.http.config || false;
+// 这是每个小程序页面,共有的配置,最后回自动合并到setting中
 // 每个页面都会有的共有方法
-module.exports = {
+export default {
     data: {},
     mix : {
         openingPage : false, // openingPage 通过转发进来,并且需要打开新页面,正在打开中... true为正在打开
@@ -33,7 +34,7 @@ module.exports = {
         } catch (e) {
             value = void 0;
         }
-        return util.deepClone(value);
+        return deepClone(value);
     },
 
     /**
@@ -126,7 +127,7 @@ module.exports = {
      * 加载失败,返回上一页
      */
     goError(text = '加载失败') {
-        util.showToast('error', text);
+        showToast('error', text);
         this.goBack();
     },
 
@@ -203,7 +204,7 @@ module.exports = {
     setStore(obj) {
         if (!this.checkedStore()) return;
         // 设置 Store
-        app.store = util.merge({}, app.store, obj);
+        app.store = merge({}, app.store, obj);
         this.mergeStore();
     },
 
@@ -229,8 +230,6 @@ module.exports = {
     },
 
     initPage() {
-        console.log(this.mix, 'initPage', this.route, Date.now())
-        // console.log(this.mix.initPage,'initPage', this.route,Date.now(),'---')
         this.mergeStore();
         let redirect = () => {
             this.mix.runOnLoad = false;
@@ -242,9 +241,8 @@ module.exports = {
             return true;
         };
         return new Promise(async (a, b) => {
-            if (this.route === 'pages/page/share') {
-                a(redirect());
-                return;
+            if (this.mix.isRun) {
+                return a(true);
             }
             if (this.onLoadBefore) {
                 this.onLoadBefore(data => {
@@ -298,7 +296,7 @@ module.exports = {
      */
     updateMixData(key, value) {
         let mixData   = this.mix[key] || {};
-        this.mix[key] = util.merge({}, mixData, value);
+        this.mix[key] = merge({}, mixData, value);
     },
 
     /**
@@ -307,13 +305,12 @@ module.exports = {
     updateTplData(name, value) {
         let currTplData = this.data[name] || {};
         let tplData     = {};
-        tplData[name]   = util.merge({}, currTplData, value);
+        tplData[name]   = merge({}, currTplData, value);
         this.setData(tplData);
     },
 
     openRedirectPage() {
         if (this.mix.openingPage) return;
-        console.error(1, this.mix.redirect, typeof this.mix.redirect)
         this.mix.openingPage = true;
         setTimeout(() => {
             // 打开新页面前,删除当前页redirect
@@ -351,7 +348,7 @@ module.exports = {
         if (!options.track) return;
         let track = JSON.parse(options.track);
         delete this.options.track;
-        console.error(track, this.route, 'track数据');
+        console.log(track, this.route, 'track数据');
     },
 
     /**
@@ -367,6 +364,7 @@ module.exports = {
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady: function () {
+        console.log(this.route, 'onReady');
         this.runEvent('pageOnReady');
     },
 
@@ -374,6 +372,7 @@ module.exports = {
      * 生命周期函数--监听页面隐藏
      */
     onHide: function () {
+        console.log(this.route, 'onHide');
         this.runEvent('pageOnHide');
     },
 
@@ -381,6 +380,7 @@ module.exports = {
      * 生命周期函数--监听页面卸载
      */
     onUnload: function () {
+        console.log(this.route, 'onUnload');
         this.runEvent('pageOnUnload');
         clearTimeout(this.mix.goBackTimer);
         this.mix.goBackTimer = null;
@@ -397,7 +397,7 @@ module.exports = {
         this.mix.consoleCount++;
         if (this.mix.consoleCount === 7) {
             console.error('打开调试');
-            util.storage('_debug', true, !!time ? time : 30 * 60);
+            storage('_debug', true, !!time ? time : 30 * 60);
             wx.setEnableDebug({
                 enableDebug: true
             })
@@ -408,6 +408,7 @@ module.exports = {
      * 页面相关事件处理函数--监听用户下拉动作
      */
     onPullDownRefresh: function () {
+        console.log(this.route, 'pagePullDownRefresh');
         this.runEvent('pagePullDownRefresh');
     },
 
@@ -415,6 +416,7 @@ module.exports = {
      * 页面上拉触底事件的处理函数
      */
     onReachBottom: function () {
+        console.log(this.route, 'onReachBottom');
         this.runEvent('pageBottomLoad');
     },
 };

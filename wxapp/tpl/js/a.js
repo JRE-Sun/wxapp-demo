@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     data: {
         a: {
             msg: '我是a组件',

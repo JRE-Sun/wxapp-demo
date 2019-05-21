@@ -1,11 +1,26 @@
-let _                  = require('./lodash.min');
-let app                = getApp();
-let {log}              = require('./config');
-let regeneratorRuntime = require('./runtime-module');
-let util               = {};
+import config from './config';
+import regeneratorRuntime from './runtime-module';
+import lodash from './lodash.min';
 
-util._     = _;
-util.merge = _.merge;
+let app   = getApp();
+let {log} = config;
+
+export const _     = lodash;
+export const merge = _.merge;
+
+
+/**
+ * 通过require引入import写法文件,返回真实obj
+ * @param path
+ * @returns {*}
+ */
+export const getImportObjByRequire = (path) => {
+    let data = require(path);
+    if (data.hasOwnProperty('default')) {
+        data = data.default;
+    }
+    return data;
+};
 
 /**
  * 腾轩转百度
@@ -13,7 +28,7 @@ util.merge = _.merge;
  * @param longitude
  * @return {{longitude: (number|*), latitude: (number|*)}}
  */
-util.tencent2baidu = (latitude, longitude) => {
+export const tencent2baidu = (latitude, longitude) => {
     let x_pi  = 3.14159265358979324 * 3000.0 / 180.0;
     let x     = longitude;
     let y     = latitude;
@@ -30,7 +45,7 @@ util.tencent2baidu = (latitude, longitude) => {
 /**
  * 百度经纬度坐标转换腾讯坐标
  */
-util.badidu2tencent = (lat, lng) => {
+export const badidu2tencent = (lat, lng) => {
     let x_pi  = 3.14159265358979324 * 3000.0 / 180.0;
     let x     = lng * 1 - 0.0065, y = lat * 1 - 0.006;
     let z     = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);
@@ -46,20 +61,20 @@ util.badidu2tencent = (lat, lng) => {
 /**
  * 检查是否为Debug模式,来动态显示隐藏console
  */
-util.checkDebug = (debugKey = '_debug') => {
+export const checkDebug = (debugKey = '_debug') => {
     if (log) {
-        util.storage('_debug', true, 30 * 60);
+        storage('_debug', true, 30 * 60);
         return;
     }
-    if (!util.storage(debugKey)) {
-        util.closeConsole();
+    if (!storage(debugKey)) {
+        closeConsole();
     }
 };
 
 /**
  * 关闭console
  */
-util.closeConsole = () => {
+export const closeConsole = () => {
     console.log   = () => {
     };
     console.error = () => {
@@ -73,7 +88,7 @@ util.closeConsole = () => {
  * @param Location2 第二点的纬度，经度
  * @return {number}
  */
-util.getDisByLocation = (location1, Location2) => {
+export const getDisByLocation = (location1, Location2) => {
     function Rad(d) {
         return d * Math.PI / 180.0;
     }
@@ -96,22 +111,12 @@ util.getDisByLocation = (location1, Location2) => {
 };
 
 /**
- * 设置页面标题
- * @param title
- */
-util.setTitleBar = title => {
-    wx.setNavigationBarTitle({
-        title: title,
-    });
-};
-
-/**
  * 获取一个月多少天
  * @param year
  * @param month
  * @return {number}
  */
-util.getMonthHasDayCounts = (year, month) => {
+export const getMonthHasDayCounts = (year, month) => {
     let date = new Date();
     date.setFullYear(year);
     date.setMonth(month);
@@ -126,7 +131,7 @@ util.getMonthHasDayCounts = (year, month) => {
  * @param day
  * @return {number}
  */
-util.getDateDay = (year, month, day) => {
+export const getDateDay = (year, month, day) => {
     let date = new Date();
     date.setFullYear(year);
     date.setMonth(month - 1);
@@ -141,7 +146,7 @@ util.getDateDay = (year, month, day) => {
  * @param duration 保存多长时间s
  * @return {*}
  */
-util.storage = (key, data = null, duration = null) => {
+export const storage = (key, data = null, duration = null) => {
     if (data === null) {
         try {
             data = wx.getStorageSync(key) || false;
@@ -185,7 +190,7 @@ util.storage = (key, data = null, duration = null) => {
  * @param callback
  * @return {number}
  */
-util.getTwoTimerTime = (startTime, endTime, callback) => {
+export const getTwoTimerTime = (startTime, endTime, callback) => {
     if (Object.prototype.toString.call(startTime).search(/String/) > -1 && startTime.search(/-/g) > -1) {
         let endStr = '.0';
         let d      = startTime.length - endStr.length;
@@ -210,7 +215,7 @@ util.getTwoTimerTime = (startTime, endTime, callback) => {
  * @param callback
  * @return {{day: number, hour: *, minute: *, second: *}}
  */
-util.getTwoTimeDistance = (milliSecond, callback) => {
+export const getTwoTimeDistance = (milliSecond, callback) => {
     let leftSecond = parseInt(milliSecond / 1000);
     let day        = Math.floor(leftSecond / (60 * 60 * 24));
     let hour       = Math.floor((leftSecond - day * 24 * 60 * 60) / 3600);
@@ -226,7 +231,7 @@ util.getTwoTimeDistance = (milliSecond, callback) => {
     return timeObj;
 };
 
-util.compose = (...args) => {
+export const compose = (...args) => {
     let i      = args.length - 1;
     let result = null;
     return function f(...argement) {
@@ -241,7 +246,7 @@ util.compose = (...args) => {
  * 柯里化
  * @param fn
  */
-util.curry = fn => {
+export const curry = fn => {
     // 首次传进来一个函数
     // 然后返回一个函数
     return function fn1(...args) {
@@ -260,7 +265,7 @@ util.curry = fn => {
 /**
  * 删除数组里keys
  */
-util.deleteArrayKeys = (array, keys) => {
+export const deleteArrayKeys = (array, keys) => {
     return array.map(n => {
         return deleteKeys(n, keys);
     });
@@ -270,7 +275,7 @@ util.deleteArrayKeys = (array, keys) => {
 /**
  * 删除对象里keys
  */
-util.deleteKeys = (obj, keys) => {
+export const deleteKeys = (obj, keys) => {
     keys.forEach(key => {
         obj.hasOwnProperty(key) && delete obj[key];
     });
@@ -281,7 +286,7 @@ util.deleteKeys = (obj, keys) => {
  * 管道
  * @param fn
  */
-util.pipe = (...fn) => {
+export const pipe = (...fn) => {
     // 首次传进来n个函数
     // 然后返回一个函数,该函数接收一个参数
     let length = fn.length;
@@ -303,7 +308,7 @@ util.pipe = (...fn) => {
  * Monad函子
  * @constructor
  */
-const Maybe = function (value) {
+export const Maybe = function (value) {
     this.val = value;
 };
 
@@ -331,15 +336,13 @@ Maybe.prototype.chain = function (fn) {
     return this.map(fn).join();
 };
 
-util.Maybe = Maybe;
-
-util._typeOf = function (val) {
+export const _typeOf = function (val) {
     return Object.prototype.toString.call(val)
 }
 
-util.jsonString = data => {
+export const jsonString = data => {
     try {
-        if (util.isString(data)) {
+        if (isString(data)) {
             data = JSON.parse(data);
         }
         data = JSON.stringify(data);
@@ -360,7 +363,7 @@ util.jsonString = data => {
  * @param query
  * @return {{imageUrl: *, title: *}}
  */
-util.initShareOptions = ({img, title, insert, track, path, query}) => {
+export const initShareOptions = ({img, title, insert, track, path, query}) => {
     let shareOption = {
         imageUrl: img,
         title   : title
@@ -398,28 +401,28 @@ util.initShareOptions = ({img, title, insert, track, path, query}) => {
 };
 
 
-util.isObject = val => {
-    return util._typeOf(val).search('Object') > -1;
+export const isObject = val => {
+    return _typeOf(val).search('Object') > -1;
 };
 
-util.isString = val => {
-    return util._typeOf(val).search('String') > -1;
+export const isString = val => {
+    return _typeOf(val).search('String') > -1;
 };
 
 
-util.isArray          = arr => {
-    return util._typeOf(arr).search('Array') > -1;
+export const isArray          = arr => {
+    return _typeOf(arr).search('Array') > -1;
 };
-util.checkArrayLength = arr => {
+export const checkArrayLength = arr => {
     if (!isArray(arr)) return null;
     return arr.length > 0 ? arr : null;
 };
-util.arrFirst         = arr => {
+export const arrFirst         = arr => {
     if (!isArray(arr)) return null;
     if (arr.length === 0) return null;
     return arr[0];
 };
-util.maybeMap         = util.curry((fn, maybe) => maybe.map(fn));
+export const maybeMap         = curry((fn, maybe) => maybe.map(fn));
 
 const TYPE_ARRAY  = '[object Array]'
 const TYPE_OBJECT = '[object Object]'
@@ -428,7 +431,7 @@ const TYPE_OBJECT = '[object Object]'
  * diff算法
  * @author 逍遥
  */
-util.addDiff = function addDiff(
+export const addDiff = function addDiff(
     current = {},
     prev    = {},
     root    = '',
@@ -438,17 +441,17 @@ util.addDiff = function addDiff(
         let key   = item[0],
             value = item[1],
             path  = root === '' ? key : root + '.' + key
-        if (util._typeOf(current) === TYPE_ARRAY) {
+        if (_typeOf(current) === TYPE_ARRAY) {
             path = root === '' ? key : root + '[' + key + ']'
         }
 
         if (!prev.hasOwnProperty(key)) {
             result[path] = value
         } else if (
-            (util._typeOf(prev[key]) === TYPE_OBJECT &&
-                util._typeOf(current[key]) === TYPE_OBJECT) ||
-            (util._typeOf(prev[key]) === TYPE_ARRAY &&
-                util._typeOf(current[key]) === TYPE_ARRAY)
+            (_typeOf(prev[key]) === TYPE_OBJECT &&
+                _typeOf(current[key]) === TYPE_OBJECT) ||
+            (_typeOf(prev[key]) === TYPE_ARRAY &&
+                _typeOf(current[key]) === TYPE_ARRAY)
         ) {
             addDiff(current[key], prev[key], path, result)
         } else if (prev[key] !== current[key]) {
@@ -458,7 +461,7 @@ util.addDiff = function addDiff(
     return result;
 }
 
-util.nullDiff = function nullDiff(
+export const nullDiff = function nullDiff(
     current = {},
     prev    = {},
     root    = '',
@@ -468,17 +471,17 @@ util.nullDiff = function nullDiff(
         let key   = item[0],
             value = item[1],
             path  = root === '' ? key : root + '.' + key
-        if (util._typeOf(current) === TYPE_ARRAY) {
+        if (_typeOf(current) === TYPE_ARRAY) {
             path = root === '' ? key : root + '[' + key + ']'
         }
 
         if (!current.hasOwnProperty(key)) {
             result[path] = null
         } else if (
-            (util._typeOf(prev[key]) === TYPE_OBJECT &&
-                util._typeOf(current[key]) === TYPE_OBJECT) ||
-            (util._typeOf(prev[key]) === TYPE_ARRAY &&
-                util._typeOf(current[key]) === TYPE_ARRAY)
+            (_typeOf(prev[key]) === TYPE_OBJECT &&
+                _typeOf(current[key]) === TYPE_OBJECT) ||
+            (_typeOf(prev[key]) === TYPE_ARRAY &&
+                _typeOf(current[key]) === TYPE_ARRAY)
         ) {
             nullDiff(current[key], prev[key], path, result)
         }
@@ -486,10 +489,10 @@ util.nullDiff = function nullDiff(
     return result;
 }
 
-util.diff = function diff(current = {}, prev = {}) {
+export const diff = function diff(current = {}, prev = {}) {
     let result = {};
-    util.addDiff(current, prev, '', result);
-    util.nullDiff(current, prev, '', result);
+    addDiff(current, prev, '', result);
+    nullDiff(current, prev, '', result);
     return result;
 };
 
@@ -498,7 +501,7 @@ util.diff = function diff(current = {}, prev = {}) {
  * @param data
  * @return {any}
  */
-util.deepClone = data => {
+export const deepClone = data => {
     if (typeof data === 'undefined' || typeof data !== 'object') {
         return data;
     }
@@ -520,15 +523,15 @@ util.deepClone = data => {
  * @param name
  * @param type
  */
-util.openMap = ({longitude = '', latitude = '', address = '', name = '', type = 'baidu'} = {}) => {
+export const openMap = ({longitude = '', latitude = '', address = '', name = '', type = 'baidu'} = {}) => {
     if (longitude === "" || latitude === "") {
-        util.showToast('error', '地址错误');
+        showToast('error', '地址错误');
         return;
     }
     let shopLocation = {};
     switch (type) {
         case 'baidu':
-            shopLocation = util.badiDu2Tencent(latitude, longitude);
+            shopLocation = badiDu2Tencent(latitude, longitude);
             break;
         case 'tencent':
             shopLocation.latitude  = latitude;
@@ -549,7 +552,7 @@ util.openMap = ({longitude = '', latitude = '', address = '', name = '', type = 
  * 检查是否有保存图片权限,如果没有直接打开授权页
  * @return {Promise<any>}
  */
-util.checkImgSetting = () => {
+export const checkImgSetting = () => {
     return new Promise((a, b) => {
         wx.getSetting({
             success(res) {
@@ -573,7 +576,7 @@ util.checkImgSetting = () => {
  * @param url
  * @param callback
  */
-util.downloadImg = (url, callback) => {
+export const downloadImg = (url, callback) => {
     if (url.indexOf('https') === -1) {
         url = url.replace(/http/ig, 'https');
     }
@@ -602,7 +605,7 @@ util.downloadImg = (url, callback) => {
  * @param title
  * @param duration
  */
-util.showToast = (type = 'loading', title = '拼命加载中', duration = 1500) => {
+export const showToast = (type = 'loading', title = '拼命加载中', duration = 1500) => {
     let options = {
         duration: type === 'loading' ? 1000000 : duration,
         title,
@@ -627,7 +630,7 @@ util.showToast = (type = 'loading', title = '拼命加载中', duration = 1500) 
  * 4. 当值为-1                    小程序获取定位权限可能超时或者什么
  * @return {Promise<any>}
  */
-util.getLocationSet = () => {
+export const getLocationSet = () => {
     return new Promise((a, b) => {
         wx.getSetting({
             success(res) {
@@ -643,7 +646,7 @@ util.getLocationSet = () => {
 /**
  * 更新app
  */
-util.updateApp = () => {
+export const updateApp = () => {
     let updateManager = wx.getUpdateManager();
     updateManager.onCheckForUpdate(function (res) {
         // 请求完新版本信息的回调
@@ -673,14 +676,14 @@ util.updateApp = () => {
 /**
  * 隐藏右上角分享
  */
-util.hideShareMenu = () => {
+export const hideShareMenu = () => {
     wx.hideShareMenu();
 };
 
 /**
  * 显示右上角分享
  */
-util.showShareMenu = () => {
+export const showShareMenu = () => {
     wx.showShareMenu();
 };
 
@@ -691,12 +694,12 @@ util.showShareMenu = () => {
  * @param oldValue
  * @return {{}}
  */
-util.formatDataByDiff = (key, newValue, oldValue) => {
-    if (util.isArray(oldValue)) {
+export const formatDataByDiff = (key, newValue, oldValue) => {
+    if (isArray(oldValue)) {
         return {[key]: newValue};
     }
     console.log(key, newValue, oldValue, 'key, newValue, oldValue');
-    let diffData = util.diff(newValue, oldValue);
+    let diffData = diff(newValue, oldValue);
     console.log(diffData, 'diffData');
     let diffObj = {};
     Object.keys(diffData).forEach(n => {
@@ -707,7 +710,7 @@ util.formatDataByDiff = (key, newValue, oldValue) => {
             return Number.isNaN(n * 1) ? n : `[${n}]`;
         }).join('.');
 
-        diffObj[`${key}.${m}`] = util.deepClone(diffData[n]);
+        diffObj[`${key}.${m}`] = deepClone(diffData[n]);
     });
     return diffObj;
 };
@@ -719,7 +722,7 @@ util.formatDataByDiff = (key, newValue, oldValue) => {
  * @param ak => 百度ak
  * @return {Promise<any>}
  */
-util.getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
+export const getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
     return new Promise((a, b) => {
         wx.request({
             url    : 'https://api.map.baidu.com/geocoder/v2/?ak=' + ak + '&location=' + latitude + ',' + longitude + '&output=json',
@@ -747,7 +750,7 @@ util.getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
  * @param callback
  * @return {Promise<any>}
  */
-util.networkChangeEvent = callback => {
+export const networkChangeEvent = callback => {
     return new Promise((a, b) => {
         wx.onNetworkStatusChange(res => {
             // ['4g', '3g', 'wifi'].indexOf(res.networkType) === -1
@@ -778,7 +781,7 @@ util.networkChangeEvent = callback => {
 /**
  * 隐藏toast
  */
-util.hideToast = () => {
+export const hideToast = () => {
     wx.hideToast();
 };
 
@@ -786,11 +789,11 @@ util.hideToast = () => {
  * 保存图片到本地
  * @return {Promise<void>}
  */
-util.saveImageToAlbum = async (path) => {
-    util.showToast('loading', '保存中..');
+export const saveImageToAlbum = async (path) => {
+    showToast('loading', '保存中..');
     // 没有权限会自动跳转 授权页面
-    if (!await util.checkImgSetting()) {
-        util.hideToast();
+    if (!await checkImgSetting()) {
+        hideToast();
         return;
     }
     // 获取权限成功
@@ -798,12 +801,12 @@ util.saveImageToAlbum = async (path) => {
         filePath: path,
         success(res) {
             console.log('保存成功', res);
-            util.showToast('success', '保存成功');
+            showToast('success', '保存成功');
         },
         fail(res) {
             console.log('保存失败', res);
-            util.checkImgSetting();
-            util.showToast('error', '保存失败');
+            checkImgSetting();
+            showToast('error', '保存失败');
         }
     });
 };
@@ -812,7 +815,7 @@ util.saveImageToAlbum = async (path) => {
  * 获取元素的宽高top之类的属性
  * @param {*} select
  */
-util.querySelector = select => {
+export const querySelector = select => {
     let query = wx.createSelectorQuery();
     query.select(select).boundingClientRect();
     return new Promise((a, b) => {
@@ -823,13 +826,11 @@ util.querySelector = select => {
 };
 
 /**
- * 设置nav title
+ * 设置页面标题
  * @param navTitle
  */
-util.setNavTitle = navTitle => {
+export const setNavTitle = navTitle => {
     wx.setNavigationBarTitle({
         title: navTitle,
     });
 };
-
-module.exports = util;
