@@ -1,14 +1,20 @@
-import {deepClone, showToast, merge, storage} from '../../utils/util';
+import {
+    deepClone,
+    showToast,
+    merge, storage,
+    updateApp
+} from '../../utils/util';
 import regeneratorRuntime from '../../utils/runtime-module';
-import config from '../../utils/config';
+import {http} from '../../utils/config';
 
 let app           = getApp();
-let openThreadErr = config.http.config || false;
+let openThreadErr = http.config || false;
 // 这是每个小程序页面,共有的配置,最后回自动合并到setting中
 // 每个页面都会有的共有方法
 export default {
     data: {},
     mix : {
+        options     : {}, // 存储options,以备不时之需...
         openingPage : false, // openingPage 通过转发进来,并且需要打开新页面,正在打开中... true为正在打开
         runOnLoad   : true, // 默认正在运行onLoad,运行完onLoad后才能执行onShow
         isRun       : false, // 判断是否正常走完onLoad和onShow
@@ -231,8 +237,11 @@ export default {
 
     initPage() {
         this.mergeStore();
-        let redirect = () => {
+        let delayRun = () => {
             this.mix.runOnLoad = false;
+        };
+        let redirect = () => {
+            delayRun();
             // 当需要重定向 直接 截断
             if (this.checkedRedirect()) {
                 this.openRedirectPage();
@@ -245,58 +254,14 @@ export default {
                 return a(true);
             }
             if (this.onLoadBefore) {
-                this.onLoadBefore(data => {
-                    this.mix.runOnLoad = false;
+                return this.onLoadBefore(data => {
+                    delayRun();
                     a(data && redirect());
                 })
-            } else {
-                this.mix.runOnLoad = false;
-                a(redirect())
             }
+            delayRun();
+            a(redirect());
         })
-    },
-
-    /**
-     * 生命周期函数--监听页面显示
-     */
-    async onShow() {
-        // 如果当前正在运行onLoad直接退出onShow
-        if (this.mix.runOnLoad) return;
-        console.log(this.route, 'onShow');
-        if (!await this.initPage()) return;
-        // mix默认是没有redirect,如果有意味着上次进入该页面是转发,onLoad,onShow周期被截断
-        if (this.mix.hasOwnProperty('redirect') && !this.mix.isRun) {
-            this.runEvent('pageOnLoad');
-            this.runEvent('pageOnShow');
-            this.mix.isRun = true;
-            return;
-        }
-        this.runEvent('pageOnShow');
-        this.mix.isRun = true;
-    },
-
-    /**
-     * 生命周期函数--监听页面加载
-     */
-    async onLoad(options) {
-        // 解析参数 设置对应mix上的key如redirect,track上
-        this.onLoadShared(options);
-        // 判断 进入页面是否需要其他逻辑,例如必须授权,必须定位等
-        if (!await this.initPage()) return;
-        console.log(this.route, 'onLoad', options);
-        this.runEvent('pageOnLoad', options);
-        openThreadErr && this.pageSendErrLog();
-        this.onShow();
-    },
-
-    /**
-     * 更新混合mix数据
-     * @param key
-     * @param value
-     */
-    updateMixData(key, value) {
-        let mixData   = this.mix[key] || {};
-        this.mix[key] = merge({}, mixData, value);
     },
 
     /**
@@ -358,6 +323,41 @@ export default {
     onLoadShared(options) {
         this.initTrackData(options);
         this.initRedirectData(options);
+    },
+
+    /**
+     * 生命周期函数--监听页面加载
+     */
+    async onLoad(options) {
+        this.mix.options = JSON.parse(JSON.stringify(options));
+        // 解析参数 设置对应mix上的key如redirect,track上
+        this.onLoadShared(options);
+        // 判断 进入页面是否需要其他逻辑,例如必须授权,必须定位等
+        if (!await this.initPage()) return;
+        this.mix.isRun = true;
+        updateApp();
+        console.log(this.route, 'onLoad', options);
+        this.runEvent('pageOnLoad', options);
+        openThreadErr && this.pageSendErrLog();
+        this.onShow();
+    },
+
+    /**
+     * 生命周期函数--监听页面显示
+     */
+    async onShow() {
+        // 如果当前正在运行onLoad直接退出onShow
+        if (this.mix.runOnLoad) return;
+        console.log(this.route, 'onShow');
+        if (!await this.initPage()) return;
+        // 如果onLoad,onShow周期被截断
+        if (!this.mix.isRun) {
+            this.runEvent('pageOnLoad', this.options);
+            this.runEvent('pageOnShow', this.options);
+            this.mix.isRun = true;
+            return;
+        }
+        this.runEvent('pageOnShow');
     },
 
     /**

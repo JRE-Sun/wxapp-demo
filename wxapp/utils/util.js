@@ -1,13 +1,10 @@
-import config from './config';
+import {log} from './config';
 import regeneratorRuntime from './runtime-module';
 import lodash from './lodash.min';
 
-let app   = getApp();
-let {log} = config;
 
 export const _     = lodash;
 export const merge = _.merge;
-
 
 /**
  * 通过require引入import写法文件,返回真实obj

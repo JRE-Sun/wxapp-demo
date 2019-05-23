@@ -1,11 +1,11 @@
-let thread = require('./thread');
-let host1  = require('./config');
+import {Http} from './thread';
+import {host1} from './config';
 
 /**
  * 某接口
  */
 export const getHappyGoodsList = (data, callback) => {
-    return thread.post({
+    return Http.post({
         url    : 'test/h/shop',
         callback,
         data,

@@ -1,4 +1,4 @@
-import {http, threadErr} from '../../utils/thread';
+import {Http, threadErr} from '../../utils/thread';
 
 export default {
     data: {},
@@ -17,7 +17,7 @@ export default {
         // 没有错误日志
         if (errLength === 0) return;
         // 当前ajax队列还有请求,延迟发送错误日志
-        if (http.httpList.length > 0) {
+        if (Http.httpList.length > 0) {
             this.mix.pageErrTimer = setTimeout(() => {
                 if (!this.mix.pageErrTimer) return;
                 this.pageSendErrLog();

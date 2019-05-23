@@ -1,7 +1,7 @@
-import config from './config';
+import {http} from './config';
 import {merge, _, getImportObjByRequire} from './util';
 
-let openThreadErr = config.http.config || false;
+let openThreadErr = http.config || false;
 export default {
     mergeConfig(tplUrlName) {
         let runEventArray = [];

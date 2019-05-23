@@ -5,11 +5,11 @@
 import regeneratorRuntime from './runtime-module';
 import {storage} from './util';
 import miment from './miment';
-import config from './config';
+import {http} from './config';
 
 let app           = getApp();
-let openThreadErr = config.http.openThreadErr || false; // 是否发送错误日志
-let log           = config.http.log || false; // 是否打印请求console
+let openThreadErr = http.openThreadErr || false; // 是否发送错误日志
+let log           = http.log || false; // 是否打印请求console
 
 /**
  * 错误日志
@@ -79,7 +79,7 @@ export const threadErr = {
             msg = '';
         }
 
-        http.post({
+        Http.post({
             url    : config.threadErr.api,
             data   : {
                 message   : JSON.stringify(currErrLog.data) + '---|---' + msg.substr(0, 1000),
@@ -103,7 +103,7 @@ export const threadErr = {
     }
 };
 
-export const http = {
+export const Http = {
     config  : {
         maxNum   : config.http.maxNum || 5, // 最大并发数
         timeout  : config.http.timeout || 14000, // 14s

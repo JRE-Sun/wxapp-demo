@@ -1,28 +1,34 @@
 /**
  * 分享
  */
-import config from './config';
 import {merge, Maybe, jsonString, initShareOptions} from './util';
+import {share} from './config';
 
-let app                  = getApp();
-let {share: configShare} = config;
 export default {
-
     /**
      * 设置分享标题/图片
-     * @param title
-     * @param img
      */
     setShareData(options) {
+        // share: {
+        //     insert: '', // 页面分享是否 需要插入前缀 路径
+        //     title : '', // 分享标题
+        //     img   : '', // 分享图
+        //     path  : '', // 分享路径
+        //     query : '', // 分享参数, 分享路径和分享参数拼接在一起最后会形成 path-query=>page/index/home?b=1
+        //     track : '', // 追踪信息,是单独在最外面
+        // },
         options        = merge({}, {
-            title: configShare.title,
-            img  : configShare.img,
+            title: share.title,
+            img  : share.img,
             path : this.route,
             query: this.options
         }, options);
         this.mix.share = {};
         Object.keys(options).forEach(n => {
             this.mix.share[n] = options[n];
+        });
+        this.setData({
+            share: this.mix.share
         });
         console.log(`${this.route}设置setShareData后的this.mix.share=`, this.mix.share);
     },
