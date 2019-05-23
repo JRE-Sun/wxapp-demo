@@ -8,7 +8,7 @@ import regeneratorRuntime from '../../utils/runtime-module';
 import {http} from '../../utils/config';
 
 let app           = getApp();
-let openThreadErr = http.config || false;
+let openThreadErr = http.openThreadErr || false;
 // 这是每个小程序页面,共有的配置,最后回自动合并到setting中
 // 每个页面都会有的共有方法
 export default {
@@ -364,7 +364,7 @@ export default {
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady: function () {
-        console.log(this.route, 'onReady');
+        console.log(this.route, 'onReady',this);
         this.runEvent('pageOnReady');
     },
 

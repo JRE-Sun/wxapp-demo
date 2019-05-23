@@ -64,7 +64,7 @@ export const threadErr = {
         let errLogList = this.getErrLogList();
         if (!errLogList || errLogList.length === 0) return;
         let currErrLog   = errLogList.shift();
-        // httpThread.config.baseURL = 'http://192.168.2.238/jfmmnear/';
+        // httpThread.baseURL = 'http://192.168.2.238/jfmmnear/';
         let isNormalJson = false;
         let msg          = currErrLog.msg;
         for (let key in msg) {
@@ -80,7 +80,7 @@ export const threadErr = {
         }
 
         Http.post({
-            url    : config.threadErr.api,
+            url    : threadErr.api,
             data   : {
                 message   : JSON.stringify(currErrLog.data) + '---|---' + msg.substr(0, 1000),
                 methodName: currErrLog.method || 'currErrLog.method取不到或为空',
@@ -92,7 +92,7 @@ export const threadErr = {
                     self.run();
                 }
             },
-            options: {...config.threadErr.options}
+            options: {...threadErr.options}
         });
     },
 
@@ -105,13 +105,13 @@ export const threadErr = {
 
 export const Http = {
     config  : {
-        maxNum   : config.http.maxNum || 5, // 最大并发数
-        timeout  : config.http.timeout || 14000, // 14s
-        baseURL  : config.http.baseURL || '', // 路径前缀
-        dataType : config.http.dataType || 'json',
-        cacheTime: config.http.cacheTime || 5 * 60,
+        maxNum   : http.maxNum || 5, // 最大并发数
+        timeout  : http.timeout || 14000, // 14s
+        baseURL  : http.baseURL || '', // 路径前缀
+        dataType : http.dataType || 'json',
+        cacheTime: http.cacheTime || 5 * 60,
         busyNum  : 0, // 繁忙数
-        headers  : config.http.headers || {'Content-Type': 'application/x-www-form-urlencoded'},
+        headers  : http.headers || {'Content-Type': 'application/x-www-form-urlencoded'},
     },
     httpList: [], // http请求队列
     post({url = null, data = null, callback = null, options = {},} = {}) {
@@ -138,15 +138,15 @@ export const Http = {
         app.networkChangeEvent();
         // 判断当前繁忙的请求数
         // 当 当前运行的 请求大于 maxNum return
-        if (this.config.maxNum <= this.config.busyNum) return;
+        if (this.maxNum <= this.busyNum) return;
         // 发送http请求
-        let length = this.config.maxNum - this.config.busyNum;
+        let length = this.maxNum - this.busyNum;
         for (let i = 0; i < length; i++) {
             if (this.httpList.length === 0) return;
             let options           = this.httpList.shift();
             let count             = options.options.count;
             options.options.count = typeof count === 'undefined' ? 0 : (count + 1);
-            ++this.config.busyNum;
+            ++this.busyNum;
             options.info.groupOut = miment().format('YYYY/MM/DD hh-mm-ss SSS');
             this.request(options.url, options.data, options.options, options.callback, options.info);
             this.run();
@@ -238,7 +238,7 @@ export const Http = {
             var keys = Object.keys(a),
                 key;
             length   = keys.length;
-
+ 
             if (Object.keys(b).length !== length) return false;
             while (length--) {
 
@@ -260,7 +260,7 @@ export const Http = {
                 if (self.eq(httpCacheList[url].data, data)) {
                     log && console.log(url + '从缓存读取数据');
                     callback && callback(httpCacheList[url].res);
-                    --self.config.busyNum;
+                    --self.busyNum;
                     self.run();
                     a();
                     return;
@@ -275,9 +275,9 @@ export const Http = {
             log && console.log(url, data, miment().format('YYYY/MM/DD hh-mm-ss SSS'), '发送');
             let currRequest = wx.request({
                 method      : options.method || 'post',
-                url         : (options.baseURL || this.config.baseURL) + url,
-                dataType    : options.dataType || this.config.dataType,
-                header      : options.headers || this.config.headers,
+                url         : (options.baseURL || this.baseURL) + url,
+                dataType    : options.dataType || this.dataType,
+                header      : options.headers || this.headers,
                 responseType: options.responseType || 'text',
                 data        : data || {},
                 success(res) {
@@ -285,7 +285,7 @@ export const Http = {
                     clearTimeout(timer);
                     timer = null;
                     // currRequest && currRequest.abort();
-                    --self.config.busyNum;
+                    --self.busyNum;
                     if (res.statusCode === 200) {
                         log && console.log(url, data, res, miment().format('YYYY/MM/DD hh-mm-ss SSS'), '接收状态200');
                         // 当没有配置cache,不缓存
@@ -300,7 +300,7 @@ export const Http = {
                                 options,
                                 res: res.data
                             };
-                            storage('http_cache_list', httpCacheList, options.cacheTime || self.config.cacheTime);
+                            storage('http_cache_list', httpCacheList, options.cacheTime || self.cacheTime);
                         }
                         callback && callback(res.data);
                         self.run();
@@ -323,7 +323,7 @@ export const Http = {
                     openThreadErr && threadErr.add(url, res, data);
                     clearTimeout(timer);
                     timer = null;
-                    --self.config.busyNum;
+                    --self.busyNum;
                     let errorData = {
                         statusCode   : -1,
                         statusMessage: res.errMsg
@@ -336,7 +336,7 @@ export const Http = {
             let timer       = setTimeout(() => {
                 if (!timer) return;
                 currRequest && currRequest.abort && currRequest.abort();
-                --this.config.busyNum;
+                --this.busyNum;
 
                 let errorData = {statusCode: -1, statusMessage: '连接超时'};
                 // 如果首次超时
@@ -360,7 +360,7 @@ export const Http = {
                 callback && callback(errorData);
                 this.run();
                 a(errorData);
-            }, this.config.timeout);
+            }, this.timeout);
         });
     },
 };
