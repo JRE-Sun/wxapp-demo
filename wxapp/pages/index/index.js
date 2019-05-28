@@ -11,7 +11,6 @@ let setting = {
         }
     },
     indexOnLoad() {
-        console.error(this);
         console.log('执行页面onLoad事件!');
     }
 };

@@ -238,7 +238,7 @@ export const Http = {
             var keys = Object.keys(a),
                 key;
             length   = keys.length;
- 
+
             if (Object.keys(b).length !== length) return false;
             while (length--) {
 

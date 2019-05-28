@@ -14,15 +14,18 @@ let openThreadErr = http.openThreadErr || false;
 export default {
     data: {},
     mix : {
-        options     : {}, // 存储options,以备不时之需...
-        openingPage : false, // openingPage 通过转发进来,并且需要打开新页面,正在打开中... true为正在打开
-        runOnLoad   : true, // 默认正在运行onLoad,运行完onLoad后才能执行onShow
-        isRun       : false, // 判断是否正常走完onLoad和onShow
-        consoleCount: 0, // 是否打开调试点击次数,连续点击7次即可打开调试
-        isMergeStore: true, // 是否合并 app.store 到页面data里面 => 为了页面上能够访问显示
-        goBackTimer : null, // 页面加载失败,goBack方法的timer
-        __event     : {
-            pageOnError: ['pageSendErrLog']
+        pageScrollTime : false,
+        pageScrollTimer: null, // 页面滚动timer
+        options        : {}, // 存储options,以备不时之需...
+        openingPage    : false, // openingPage 通过转发进来,并且需要打开新页面,正在打开中... true为正在打开
+        runOnLoad      : true, // 默认正在运行onLoad,运行完onLoad后才能执行onShow
+        isRun          : false, // 判断是否正常走完onLoad和onShow
+        consoleCount   : 0, // 是否打开调试点击次数,连续点击7次即可打开调试
+        isMergeStore   : true, // 是否合并 app.store 到页面data里面 => 为了页面上能够访问显示
+        goBackTimer    : null, // 页面加载失败,goBack方法的timer
+        __event        : {
+            pageOnError: ['pageSendErrLog'],
+            pageScroll : ['pageOnScroll'],
         }
     },
 
@@ -84,6 +87,28 @@ export default {
                 url: `/pages/${dataset.query}`
             })
         }
+    },
+
+    /**
+     * 图片懒加载
+     */
+    async imgLazyLoad(scrollTop) {
+        let lazyImg = await querySelectorAll('.img-lazy-load');
+        if (lazyImg.length === 0) return;
+        let setObj   = {};
+        let lazyLoad = this.data.lazyLoad || {};
+        lazyImg.forEach(n => {
+            if (lazyLoad[n.dataset.lazyKey]) return;
+            setObj[n.dataset.lazyKey] = n.top <= (scrollTop + 300);
+        });
+        lazyLoad = merge({}, lazyLoad, setObj);
+        this.setData({
+            lazyLoad,
+        });
+    },
+
+    pageOnScroll(scrollTop) {
+        this.imgLazyLoad(scrollTop);
     },
 
     /**
@@ -236,7 +261,6 @@ export default {
     },
 
     initPage() {
-        this.mergeStore();
         let delayRun = () => {
             this.mix.runOnLoad = false;
         };
@@ -253,15 +277,29 @@ export default {
             if (this.mix.isRun) {
                 return a(true);
             }
-            if (this.onLoadBefore) {
-                return this.onLoadBefore(data => {
+
+            if (this.hasOwnProperty('onLoadBefore')) {
+                return this.onLoadBefore(async data => {
+                    if (!await this.onDefaultLoad()) return a(false);
                     delayRun();
                     a(data && redirect());
                 })
             }
+            if (!await this.onDefaultLoad()) return a(false);
             delayRun();
             a(redirect());
         })
+    },
+
+    /**
+     * 返回值, a(true)  会继续执行生命周期
+     *       a(false)  会截断生命周期
+     * @returns {Promise<any>}
+     */
+    onDefaultLoad() {
+        return new Promise(async (a, b) => {
+            a(true);
+        });
     },
 
     /**
@@ -364,7 +402,7 @@ export default {
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady: function () {
-        console.log(this.route, 'onReady',this);
+        console.log(this.route, 'onReady');
         this.runEvent('pageOnReady');
     },
 
@@ -381,6 +419,8 @@ export default {
      */
     onUnload: function () {
         console.log(this.route, 'onUnload');
+        clearTimeout(this.mix.pageScrollTimer);
+        this.mix.pageScrollTimer = null;
         this.runEvent('pageOnUnload');
         clearTimeout(this.mix.goBackTimer);
         this.mix.goBackTimer = null;
@@ -388,6 +428,35 @@ export default {
             clearTimeout(this.mix.pageErrTimer);
             this.mix.pageErrTimer = null;
         }
+    },
+
+    /**
+     * 页面滚动事件
+     * @param e
+     */
+    onPageScroll: function (e) {
+        let currTime       = new Date().getTime();
+        let pageScrollTime = this.mix.pageScrollTime;
+        if (!pageScrollTime) {
+            this.mix.pageScrollTime = pageScrollTime = currTime;
+        }
+
+        let run = () => {
+            clearTimeout(this.mix.pageScrollTimer);
+            this.mix.pageScrollTimer = null;
+            this.mix.pageScrollTime  = currTime;
+            this.runEvent('pageScroll', e.scrollTop);
+        };
+
+        if (!this.mix.pageScrollTimer) {
+            this.mix.pageScrollTimer = setTimeout(() => {
+                run();
+            }, 800);
+        }
+
+        // 如果两次滚动之间时间小于300ms,不变化
+        if (currTime - pageScrollTime < 400) return;
+        run();
     },
 
     /**

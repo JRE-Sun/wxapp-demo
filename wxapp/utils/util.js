@@ -56,6 +56,27 @@ export const badidu2tencent = (lat, lng) => {
 }
 
 /**
+ * showModal
+ * @param title
+ * @param content
+ * @param callback
+ */
+export const showModal = ({title = '标题', content = '内容', callback}) => {
+    wxObj.showModal({
+        title,
+        content,
+        success: function (res) {
+            if (res.confirm) {
+                callback(true);
+                return;
+            }
+            callback(false);
+        }
+    })
+};
+
+
+/**
  * 检查是否为Debug模式,来动态显示隐藏console
  */
 export const checkDebug = (debugKey = '_debug') => {
@@ -187,7 +208,7 @@ export const storage = (key, data = null, duration = null) => {
  * @param callback
  * @return {number}
  */
-export const getTwoTimerTime = (startTime, endTime, callback) => {
+export const getSecondByTwoTimer = (startTime, endTime, callback) => {
     if (Object.prototype.toString.call(startTime).search(/String/) > -1 && startTime.search(/-/g) > -1) {
         let endStr = '.0';
         let d      = startTime.length - endStr.length;
@@ -212,7 +233,7 @@ export const getTwoTimerTime = (startTime, endTime, callback) => {
  * @param callback
  * @return {{day: number, hour: *, minute: *, second: *}}
  */
-export const getTwoTimeDistance = (milliSecond, callback) => {
+export const formatMillis = (milliSecond, callback) => {
     let leftSecond = parseInt(milliSecond / 1000);
     let day        = Math.floor(leftSecond / (60 * 60 * 24));
     let hour       = Math.floor((leftSecond - day * 24 * 60 * 60) / 3600);
@@ -410,7 +431,7 @@ export const isString = val => {
 export const isArray          = arr => {
     return _typeOf(arr).search('Array') > -1;
 };
-export const checkArrayLength = arr => {
+export const getArrayLength = arr => {
     if (!isArray(arr)) return null;
     return arr.length > 0 ? arr : null;
 };
@@ -628,10 +649,24 @@ export const showToast = (type = 'loading', title = '拼命加载中', duration 
  * @return {Promise<any>}
  */
 export const getLocationSet = () => {
+    let status = void 0;
+    try {
+        status = wxObj.getStorageSync('locationSet');
+        if (typeof status === 'string' && status.length === 0) {
+            status = void 0;
+        }
+    } catch (e) {
+        status = void 0;
+    }
     return new Promise((a, b) => {
-        wx.getSetting({
+        if (status !== void 0) return a(status);
+        wxObj.getSetting({
             success(res) {
-                a(res.authSetting['scope.userLocation']);
+                status = res.authSetting['scope.userLocation'];
+                if (status !== void 0) {
+                    storage('locationSet', status);
+                }
+                a(status);
             },
             error() {
                 a(false);
@@ -639,6 +674,7 @@ export const getLocationSet = () => {
         });
     });
 };
+
 
 /**
  * 更新app
@@ -743,7 +779,7 @@ export const getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
 
 
 /**
- * 监听网络发生变化
+ * 监听网络变化
  * @param callback
  * @return {Promise<any>}
  */
