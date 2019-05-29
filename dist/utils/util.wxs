@@ -1,0 +1,5 @@
+module.exports = {
+    isTrue: function (a) {
+        return a;
+    }
+};

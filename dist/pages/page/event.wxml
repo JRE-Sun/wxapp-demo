@@ -1,0 +1,1 @@
+<button class="page__item font-16">{{ msg }}</button><import src="../../tpl/view/a.wxml"/><template is="a" data="{{ a }}"/><import src="../../tpl/view/b.wxml"/><template is="b" data="{{ b }}"/>

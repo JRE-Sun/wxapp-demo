@@ -1,0 +1,1 @@
+<block wx:if="{{ showDom }}"><view catch:tap="storeAddClickCount" style="height:50px;background:#fff">此区域可点击增加count: count =>{{ $store.count }}</view><view style="color:red">mix : { isMergeStore : true }<text>注意 开启合并store 开关</text></view><button class="page__item font-16" data-query="page/storePage2" catch:tap="openPage">打开新页面</button>{{ $store.isLogin }}</block>
