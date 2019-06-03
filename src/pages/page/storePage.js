@@ -19,7 +19,7 @@ let setting = {
         app.globalData.a = app.globalData.a + 1;
 
         setTimeout(() => {
-            this.setPageData({
+            this.$setData({
                 showDom: true,
             })
             console.log(app.globalData.a)

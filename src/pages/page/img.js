@@ -28,7 +28,7 @@ let setting = {
                 return;
             }
             util.showToast('success', '下载成功');
-            this.setPageData({
+            this.$setData({
                 downloadImgPath: res.savedFilePath
             })
         });

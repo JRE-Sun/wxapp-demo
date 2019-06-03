@@ -53,7 +53,7 @@ export default {
     defaultLoadImgEvent({currentTarget}) {
         let loadKey = currentTarget.dataset.loadKey;
         let key     = loadKey || 'imgLoaded';
-        this.setData({
+        this.$setData({
             [key]: true,
         })
     },
@@ -102,7 +102,7 @@ export default {
             setObj[n.dataset.lazyKey] = n.top <= (scrollTop + 300);
         });
         lazyLoad = merge({}, lazyLoad, setObj);
-        this.setData({
+        this.$setData({
             lazyLoad,
         });
     },
@@ -162,37 +162,12 @@ export default {
         this.goBack();
     },
 
-    /**
-     * 设置页面data
-     * @param obj
-     */
-    setPageData(obj = {}) {
-        // todo 待解决合并数据通过 diff => 失败一次了
-        // let diffObj = {};
-        // obj         = util.deepClone(obj);
-        // console.log(obj, 'setPageData');
-        // Object.keys(obj).forEach(key => {
-        //     let newValue = obj[key];
-        //     let oldValue = this.data[key];
-        //     // page页面上没有 或者 老的值不是 数组或者json
-        //     if (typeof oldValue === 'undefined' || typeof oldValue !== 'object' || typeof newValue !== 'object') {
-        //         diffObj[`${key}`] = newValue;
-        //         return;
-        //     }
-        //     console.log(key, 'key');
-        //     let getDiff = util.formatDataByDiff(key, newValue, oldValue);
-        //     console.log('getDiff=>', getDiff);
-        //     if (!getDiff) {
-        //         diffObj[key] = false;
-        //     } else {
-        //         console.log(diffObj, getDiff, 'diffObj, getDiff');
-        //         diffObj = util.merge(diffObj, getDiff);
-        //     }
-        //     console.log('diffObj', diffObj);
-        // });
-        // if (Object.keys(diffObj).length === 0) return;
-        // console.log(diffObj, '差异合并diffObj');
-        this.setData(obj);
+    $setData(newData = {}, oldData = this.data) {
+        let diffResult = diff(newData, oldData);
+        if (Object.keys(diffResult)[0] === '') {
+            diffResult = diffResult[''];
+        }
+        this.$setData(diffResult);
     },
 
     /**
@@ -200,7 +175,7 @@ export default {
      */
     mergeStore() {
         if (!this.checkedStore()) return;
-        this.setPageData({
+        this.$setData({
             '$store': app.store
         });
     },
@@ -309,7 +284,7 @@ export default {
         let currTplData = this.data[name] || {};
         let tplData     = {};
         tplData[name]   = merge({}, currTplData, value);
-        this.setData(tplData);
+        this.$setData(tplData);
     },
 
     openRedirectPage() {

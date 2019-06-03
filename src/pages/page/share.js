@@ -42,7 +42,7 @@ let setting = {
     },
     changeShareMenu() {
         let shareMenu = !this.getPageData('shareMenu');
-        this.setPageData({
+        this.$setData({
             shareMenu,
         })
         if (shareMenu) {

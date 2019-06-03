@@ -13,7 +13,7 @@ let setting = {
         }
     },
     newPageOnLoad(options) {
-        this.setPageData({
+        this.$setData({
             options
         })
     }

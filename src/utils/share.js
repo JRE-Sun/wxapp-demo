@@ -27,7 +27,7 @@ export default {
         Object.keys(options).forEach(n => {
             this.mix.share[n] = options[n];
         });
-        this.setData({
+        this.$setData({
             share: this.mix.share
         });
         console.log(`${this.route}设置setShareData后的this.mix.share=`, this.mix.share);

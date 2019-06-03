@@ -1,10 +1,15 @@
 import {log} from './config';
 import regeneratorRuntime from './runtime-module';
 import lodash from './lodash.min';
-
+import diffJs from './diff';
 
 export const _     = lodash;
 export const merge = _.merge;
+
+/**
+ * diff算法
+ */
+export const diff = diffJs;
 
 /**
  * 通过require引入import写法文件,返回真实obj
@@ -428,91 +433,19 @@ export const isString = val => {
 };
 
 
-export const isArray          = arr => {
+export const isArray        = arr => {
     return _typeOf(arr).search('Array') > -1;
 };
 export const getArrayLength = arr => {
     if (!isArray(arr)) return null;
     return arr.length > 0 ? arr : null;
 };
-export const arrFirst         = arr => {
+export const arrFirst       = arr => {
     if (!isArray(arr)) return null;
     if (arr.length === 0) return null;
     return arr[0];
 };
-export const maybeMap         = curry((fn, maybe) => maybe.map(fn));
-
-const TYPE_ARRAY  = '[object Array]'
-const TYPE_OBJECT = '[object Object]'
-
-/**
- * diff算法
- * @author 逍遥
- */
-export const addDiff = function addDiff(
-    current = {},
-    prev    = {},
-    root    = '',
-    result  = {}
-) {
-    Object.entries(current).forEach(item => {
-        let key   = item[0],
-            value = item[1],
-            path  = root === '' ? key : root + '.' + key
-        if (_typeOf(current) === TYPE_ARRAY) {
-            path = root === '' ? key : root + '[' + key + ']'
-        }
-
-        if (!prev.hasOwnProperty(key)) {
-            result[path] = value
-        } else if (
-            (_typeOf(prev[key]) === TYPE_OBJECT &&
-                _typeOf(current[key]) === TYPE_OBJECT) ||
-            (_typeOf(prev[key]) === TYPE_ARRAY &&
-                _typeOf(current[key]) === TYPE_ARRAY)
-        ) {
-            addDiff(current[key], prev[key], path, result)
-        } else if (prev[key] !== current[key]) {
-            result[path] = value
-        }
-    })
-    return result;
-}
-
-export const nullDiff = function nullDiff(
-    current = {},
-    prev    = {},
-    root    = '',
-    result  = {}
-) {
-    Object.entries(prev).forEach(item => {
-        let key   = item[0],
-            value = item[1],
-            path  = root === '' ? key : root + '.' + key
-        if (_typeOf(current) === TYPE_ARRAY) {
-            path = root === '' ? key : root + '[' + key + ']'
-        }
-
-        if (!current.hasOwnProperty(key)) {
-            result[path] = null
-        } else if (
-            (_typeOf(prev[key]) === TYPE_OBJECT &&
-                _typeOf(current[key]) === TYPE_OBJECT) ||
-            (_typeOf(prev[key]) === TYPE_ARRAY &&
-                _typeOf(current[key]) === TYPE_ARRAY)
-        ) {
-            nullDiff(current[key], prev[key], path, result)
-        }
-    })
-    return result;
-}
-
-export const diff = function diff(current = {}, prev = {}) {
-    let result = {};
-    addDiff(current, prev, '', result);
-    nullDiff(current, prev, '', result);
-    return result;
-};
+export const maybeMap       = curry((fn, maybe) => maybe.map(fn));
 
 /**
  * 极简深拷贝 => 不能属性是函数
