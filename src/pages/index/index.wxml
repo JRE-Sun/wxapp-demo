@@ -1,1 +1,3 @@
-<view>首页</view>
+<wxs module="util" src="../../utils/util.wxs"/>
+首页
+{{$store.count}}

@@ -165,14 +165,9 @@ export default {
             })
         };
         wx.showModal({
-            title  : '确定生成电子合同?',
-            content: '注:生成后将不能更改,请谨慎!',
+            title  : '确定',
             success: function (res) {
-                if (res.confirm) {
-                    canvasPath();
-                    return;
-                }
-
+                if (res.confirm) return canvasPath();
             }
         });
     },

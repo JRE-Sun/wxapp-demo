@@ -3,117 +3,15 @@
  * @type {*|global.regeneratorRuntime}
  */
 import regeneratorRuntime from "./runtime-module";
-import {storage, networkChangeEvent, merge, _, getAppUserInfo} from "./util";
+import {storage, networkChangeEvent, merge, _,} from "./util";
 import miment from "./miment";
 import {http} from "./config";
-// import {threadErr} from './config'
 
-let config        = require('./config');
-let app           = getApp();
-import {showToast} from './util';
-let openThreadErr = http.openThreadErr || false; // 是否发送错误日志
-let log           = http.log || false; // 是否打印请求console
-
-/**
- * 错误日志
- */
-export const threadErr = {
-    add(method, msg, data = "") {
-        let errLogList = this.getErrLogList();
-        let isHasLog   = false;
-        errLogList.forEach(n => {
-            if (method === n.method) {
-                isHasLog = true;
-            }
-        });
-
-        !isHasLog &&
-        errLogList.push({
-            method,
-            msg,
-            data
-        });
-        storage("errLogList", errLogList);
-        // this.run();
-    },
-    getErrLogList() {
-        // 缓存的错误日志
-        return storage("errLogList") || [];
-    },
-
-    getNetworkType() {
-        return new Promise((a, b) => {
-            wx.getNetworkType({
-                success(res) {
-                    a(res.networkType !== "none");
-                },
-                fail() {
-                    a(false);
-                }
-            });
-        });
-    },
-
-    isEmptyObject(obj) {
-        if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
-            return false;
-        }
-        return JSON.stringify(obj) === "{}";
-    },
-
-    async sendErrLog() {
-        let self = this;
-        // 用户当前没网,不发送日志
-        if (!(await this.getNetworkType())) return;
-        let errLogList = this.getErrLogList();
-        if (!errLogList || errLogList.length === 0) return;
-        let currErrLog   = errLogList.shift();
-        currErrLog.uid   = getAppUserInfo('uid');
-        // httpThread.baseURL = 'http://192.168.2.238/jfmmnear/';
-        let isNormalJson = false;
-        let msg          = currErrLog.msg;
-        for (let key in msg) {
-            isNormalJson = true;
-        }
-
-        if (isNormalJson) {
-            msg = JSON.stringify(msg);
-        }
-
-        if (this.isEmptyObject(msg)) {
-            msg = "";
-        }
-        Http.post({
-            url    : config.threadErr.api,
-            data   : {
-                message   :
-                    JSON.stringify(currErrLog.data) +
-                    "---|---" +
-                    msg.substr(0, 1000),
-                methodName:
-                    currErrLog.method || "currErrLog.method取不到或为空",
-                uid       : currErrLog.uid
-            },
-            callback(res) {
-                if (res.code === 0) {
-                    storage("errLogList", errLogList);
-                    self.run();
-                }
-            },
-            options: {...config.threadErr.options}
-        });
-    },
-
-    async run() {
-        // 用户当前没网,不发送日志
-        if (!(await this.getNetworkType())) return;
-        this.sendErrLog();
-    }
-};
+let log = http.log || false; // 是否打印请求console
 
 export const Http = {
     config  : {
-        maxNum   : http.maxNum || 5, // 最大并发数
+        maxNum   : http.maxNum || 500, // 最大并发数
         timeout  : http.timeout || 14000, // 14s
         baseURL  : http.baseURL || "", // 路径前缀
         dataType : http.dataType || "json",
@@ -403,7 +301,6 @@ export const Http = {
                         statusCode   : -1,
                         statusMessage: res.errMsg
                     };
-                    openThreadErr && threadErr.add(url, res, data);
                     log &&
                     console.error(
                         url,
@@ -426,7 +323,6 @@ export const Http = {
                         res
                     );
                     if (res.errMsg.search(/abort/gi) > -1) return;
-                    openThreadErr && threadErr.add(url, res, data);
                     clearTimeout(timer);
                     timer = null;
                     --self.config.busyNum;
@@ -471,45 +367,10 @@ export const Http = {
                     miment().format("YYYY/MM/DD hh-mm-ss SSS"),
                     "接收超时"
                 );
-                // openThreadErr &&
-                threadErr.add(url, {msg: "请求超时", info}, data);
                 callback && callback(errorData);
                 this.run();
                 a(errorData);
             }, this.config.timeout);
         });
     },
-    upload({url, filePath, formData, options, callback}) {
-        console.log(url, formData, miment().format('YYYY/MM/DD hh-mm-ss SSS'), '发送');
-        // 图片上传
-        wx.uploadFile({
-            url     : options.baseUrl + url + '',
-            filePath: filePath,
-            name    : options.name,
-            formData: formData,
-            success(res) {
-                console.log(url, formData, res, miment().format('YYYY/MM/DD hh-mm-ss SSS'), '接收');
-                if (res.statusCode === 200) {
-                    try {
-                        callback && callback(JSON.parse(res.data));
-                    } catch (e) {
-                        console.log('数据错误');
-                    }
-                    return;
-                }
-                let errorData = {
-                    statusCode   : -1,
-                    statusMessage: res.errMsg
-                };
-                // threadErrLog.add(url, res, formData);
-                console.log(url, formData, miment().format('YYYY/MM/DD hh-mm-ss SSS'), '接收状态非200');
-                callback && callback(errorData);
-                // a(errorData)
-            },
-            fail(res) {
-                showToast('error', '上传失败!');
-                // console.log(url, data, miment().format('YYYY/MM/DD hh-mm-ss SSS'), '接收失败', res);
-            }
-        });
-    }
 };

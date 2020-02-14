@@ -122,25 +122,6 @@ export const setUserInfo = (key, value) => {
     userInfo[key] = value;
     storage("userInfo", userInfo);
 };
-/**
- * 获取商家数据
- * @param key
- * @returns {*}
- */
-export const getMerchant = (key = null) => {
-    return getDataByStorage("merchant", key);
-};
-
-/**
- * 设置商家信息缓存
- * @param key
- * @param value
- */
-export const setMerchant = (key, value) => {
-    let merchant  = getMerchant();
-    merchant[key] = value;
-    storage("merchant", merchant);
-};
 
 /**
  * 获取storage里面缓存的数据
@@ -171,29 +152,6 @@ export const showModal = ({title = "标题", content = "内容", callback}) => {
             callback(false);
         }
     });
-};
-
-/**
- * 检查是否为Debug模式,来动态显示隐藏console
- */
-export const checkDebug = (debugKey = "_debug") => {
-    if (log) {
-        storage("_debug", true, 30 * 60);
-        return;
-    }
-    if (!storage(debugKey)) {
-        closeConsole();
-    }
-};
-
-/**
- * 关闭console
- */
-export const closeConsole = () => {
-    console.log   = () => {
-    };
-    console.error = () => {
-    };
 };
 
 /**
@@ -272,13 +230,13 @@ export const storage = (key, data = null, duration = null) => {
     if (key === null) return false;
     if (data === null) {
         try {
-            data = wxObj.getStorageSync(key) || false;
+            data = wx.getStorageSync(key) || false;
             // 走判断时间逻辑
             if (data && data.duration) {
                 let currTime = Math.ceil(new Date().getTime() / 1000);
                 if (currTime >= data.duration) {
                     data = false;
-                    wxObj.setStorageSync(key, false);
+                    wx.setStorageSync(key, false);
                 } else {
                     data = data[key];
                 }
@@ -292,7 +250,7 @@ export const storage = (key, data = null, duration = null) => {
     try {
         // 当没有设置时间,直接存
         if (!duration) {
-            wxObj.setStorageSync(key, data);
+            wx.setStorageSync(key, data);
             return;
         }
         // 设置了缓存时间
@@ -300,7 +258,7 @@ export const storage = (key, data = null, duration = null) => {
         obj[key]     = data;
         //  在 duration 时间过期,传进来的是秒,例如 保存 30s
         obj.duration = Math.ceil(new Date().getTime() / 1000) + duration * 1;
-        wxObj.setStorageSync(key, obj);
+        wx.setStorageSync(key, obj);
     } catch (e) {
         console.log("缓存失败", e);
     }
@@ -606,7 +564,7 @@ export const openMap = ({
             shopLocation.longitude = longitude;
             break;
     }
-    wxObj.openLocation({
+    wx.openLocation({
         latitude : shopLocation.latitude,
         longitude: shopLocation.longitude,
         scale    : 18,
@@ -619,8 +577,6 @@ export const openMap = ({
  * 检查是否有保存图片权限,如果没有直接打开授权页
  * @return {Promise<any>}
  */
-// const wxObj=wx;
-
 export const checkImgSetting = () => {
     return new Promise((a, b) => {
         wxObj.getSetting({
@@ -629,7 +585,7 @@ export const checkImgSetting = () => {
 
                 if (imgSet === false) {
                     console.log('res', res, imgSet === false)
-                    wxObj.openSetting({});
+                    wx.openSetting({});
                     a(false);
                     return;
                 }
@@ -649,25 +605,28 @@ export const checkImgSetting = () => {
  * @param callback
  */
 export const downloadImg = (url, callback) => {
+    if (url.indexOf("http") === -1) return callback({__error: 1});
     if (url.indexOf("https") === -1) {
         url = url.replace(/http/gi, "https");
     }
     console.log(url, '下载图片地址')
-    wxObj.downloadFile({
+    wx.downloadFile({
         url    : url,
         success: function (res) {
-            wxObj.saveFile({
+            wx.saveFile({
                 tempFilePath: res.tempFilePath,
                 success     : fileRes => {
                     callback(fileRes);
                 },
                 fail(fileRes) {
-                    callback(fileRes);
+                    callback(fileRes, 1);
+                    console.log('保存失败', fileRes);
                 }
             });
         },
         fail(fileRes) {
-            callback(fileRes);
+            console.log('downloadFile失败', fileRes);
+            callback(fileRes, 2);
         }
     });
 };
@@ -696,7 +655,7 @@ export const showToast = (
     } else {
         options.icon = type;
     }
-    wxObj.showToast(options);
+    wx.showToast(options);
 };
 
 /**
@@ -737,13 +696,13 @@ export const getLocationSet = () => {
  * 更新app
  */
 export const updateApp = () => {
-    let updateManager = wxObj.getUpdateManager();
+    let updateManager = wx.getUpdateManager();
     updateManager.onCheckForUpdate(function (res) {
         // 请求完新版本信息的回调
     });
     updateManager.onUpdateReady(function () {
         let showUpdateModal = () => {
-            wxObj.showModal({
+            wx.showModal({
                 title  : "更新提示",
                 content: "新版本已经准备好，是否重启应用？",
                 success: function (res) {
@@ -767,14 +726,14 @@ export const updateApp = () => {
  * 隐藏右上角分享
  */
 export const hideShareMenu = () => {
-    wxObj.hideShareMenu();
+    wx.hideShareMenu();
 };
 
 /**
  * 显示右上角分享
  */
 export const showShareMenu = () => {
-    wxObj.showShareMenu();
+    wx.showShareMenu();
 };
 
 /**
@@ -795,13 +754,13 @@ export const formatDataByDiff = (key, newValue, oldValue) => {
     Object.keys(diffData).forEach(n => {
         // 0.a
         let m = n
-        .split(".")
-        .map(n => {
-            // 非文字
-            // Number.isNaN(n * 1)
-            return Number.isNaN(n * 1) ? n : `[${n}]`;
-        })
-        .join(".");
+            .split(".")
+            .map(n => {
+                // 非文字
+                // Number.isNaN(n * 1)
+                return Number.isNaN(n * 1) ? n : `[${n}]`;
+            })
+            .join(".");
 
         diffObj[`${key}.${m}`] = deepClone(diffData[n]);
     });
@@ -817,7 +776,7 @@ export const formatDataByDiff = (key, newValue, oldValue) => {
  */
 export const getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
     return new Promise((a, b) => {
-        wxObj.request({
+        wx.request({
             url    :
                 "https://api.map.baidu.com/geocoder/v2/?ak=" +
                 ak +
@@ -851,7 +810,7 @@ export const getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
  */
 export const networkChangeEvent = callback => {
     return new Promise((a, b) => {
-        wxObj.onNetworkStatusChange(res => {
+        wx.onNetworkStatusChange(res => {
             // ['4g', '3g', 'wifi'].indexOf(res.networkType) === -1
             if (!res.isConnected || res.networkType === "none") {
                 callback();
@@ -860,7 +819,7 @@ export const networkChangeEvent = callback => {
             }
             a(true);
         });
-        wxObj.getNetworkType({
+        wx.getNetworkType({
             success(res) {
                 // ['4g', '3g', 'wifi'].indexOf(res.networkType) === -1
                 if (res.networkType === "none") {
@@ -881,7 +840,7 @@ export const networkChangeEvent = callback => {
  * 隐藏toast
  */
 export const hideToast = () => {
-    wxObj.hideToast();
+    wx.hideToast();
 };
 
 /**
@@ -919,7 +878,7 @@ export const saveImageToAlbum = async path => {
  * @param {*} select
  */
 export const querySelector = select => {
-    let query = wxObj.createSelectorQuery();
+    let query = wx.createSelectorQuery();
     query.select(select).boundingClientRect();
     return new Promise((a, b) => {
         query.exec(res => {
@@ -933,14 +892,20 @@ export const querySelector = select => {
  * @param navTitle
  */
 export const setNavTitle = navTitle => {
-    wxObj.setNavigationBarTitle({
+    wx.setNavigationBarTitle({
         title: navTitle
     });
 };
-// 复制
-export const copyEvent   = (url, title, showFalse = true) => {
+
+/**
+ * 复制
+ * @param url
+ * @param title
+ * @param showFalse
+ */
+export const copyEvent = (url, title, showFalse = true) => {
     let copyApi = (data) => {
-        wxObj.setClipboardData({
+        wx.setClipboardData({
             data,
             success(res) {
                 console.log('复制成功', res);
@@ -950,7 +915,7 @@ export const copyEvent   = (url, title, showFalse = true) => {
     if (!showFalse) {
         return copyApi(url);
     }
-    wxObj.showModal({
+    wx.showModal({
         title     : '提示',
         content   : title,
         showCancel: false,
@@ -959,17 +924,20 @@ export const copyEvent   = (url, title, showFalse = true) => {
         }
     });
 };
-// 打开妈妈身边
-export const openApp     = (path) => {
-    wxObj.navigateToMiniProgram({
-        appId     : 'wx3a1ce624e659533a',
+
+/**
+ * 打开其他小程序
+ * @param path
+ */
+export const openApp = (appId, path) => {
+    wx.navigateToMiniProgram({
+        appId,
         path      : `pages/${path}`,
         envVersion: appVersion,
         success(res) {
             // 打开成功
         },
         fail(res) {
-            console.log('打开妈妈身边', res);
             showToast("error", "打开失败 !");
         }
     })

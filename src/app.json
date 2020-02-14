@@ -1,7 +1,41 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/index/user"
   ],
+  "tabBar": {
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "image/navbar_home.png",
+        "selectedIconPath": "image/navbar_home_active.png"
+      },
+      {
+        "pagePath": "pages/index/user",
+        "text": "我的",
+        "iconPath": "image/navbar_user.png",
+        "selectedIconPath": "image/navbar_user_active.png"
+      }
+    ],
+    "selectedColor": "#474050",
+    "color": "#999",
+    "borderStyle": "black",
+    "position": "bottom",
+    "backgroundColor": "#fff"
+  },
+  "navigateToMiniProgramAppIdList": [
+    "wx3a1ce624e659533a"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "wxapp",
+    "navigationBarTextStyle": "black"
+  },
+  "networkTimeout": {
+    "downloadFile": 30000
+  },
   "sitemapLocation": "sitemap.json",
   "permission": {
     "scope.userLocation": {

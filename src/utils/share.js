@@ -23,7 +23,7 @@ export default {
             path : this.route,
             query: this.options
         }, options);
-        this.mix.share = {};
+        // this.mix.share = {};
         Object.keys(options).forEach(n => {
             this.mix.share[n] = options[n];
         });

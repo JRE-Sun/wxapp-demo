@@ -1,6 +1,5 @@
 import {http} from "./config";
 import {merge, _, getImportObjByRequire} from "./util";
-import defaultMethods from "./default";
 
 let openThreadErr = http.openThreadErr || false;
 export default {
@@ -27,24 +26,17 @@ export default {
         }
         return mergeTplJs;
     },
-    addPageMethods(pageName, data) {
-        if (!defaultMethods.hasOwnProperty(pageName)) return data;
-        let pageMethodList = defaultMethods[pageName];
-        Object.keys(pageMethodList).forEach(n => {
-            data[n] = pageMethodList[n];
-        });
-        return data;
-    },
     runPage(setting, tplUrlName = []) {
         let mergeTplJs = {};
         openThreadErr && tplUrlName.push("threadErr");
-        tplUrlName.push("login");
         tplUrlName.push("run");
         if (tplUrlName.length !== 0) {
             mergeTplJs = this.mergeConfig(tplUrlName);
         }
-        let pageName = setting.hasOwnProperty('name') ? setting.name : null;
-        setting      = this.addPageMethods(pageName, setting);
+
+        if (tplUrlName.length !== 0) {
+            mergeTplJs = this.mergeConfig(tplUrlName);
+        }
         let mergeRunEvent;
         let settingRunEvent;
         if (mergeTplJs.mix) {

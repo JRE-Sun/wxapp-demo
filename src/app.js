@@ -1,8 +1,4 @@
-import Store from './utils/store';
-import {storage} from "./utils/util";
-
-let debug = storage('_debug');
-let store = new Store({a: 1, debug});
+//app.js
 App({
     /**
      * 小程序打开,只执行一次
@@ -16,5 +12,9 @@ App({
         console.error(scene, "app onshow options");
     },
 
-    store, // 页面间传参,或者所谓的全局缓存
+    globalData: {},
+
+    store: {
+        count: 0,
+    } // 页面间传参,或者所谓的全局缓存
 });

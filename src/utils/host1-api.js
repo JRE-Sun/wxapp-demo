@@ -2,56 +2,23 @@ import Http from "./http";
 import {host1} from "./config";
 
 /**
- * 普通请求
+ * 获取城市列表
  * @param data
- * @param callback
- * @returns {*|Promise<void>}
  */
-export const base1 = (data, callback) => {
+export const getUserInfo = (data, callback) => {
     return Http.post({
-        url    : "base1",
+        url    : "api/a/b",
         data,
         callback,
         options: {
-            baseURL: host1,
+            // -------------------------
+            // baseURL为必填，其他选填
+            // -------------------------
+            cache    : true, // 是否缓存该请求
+            cacheTime: 24 * 60 * 60, // 缓存24小时
+            baseURL  : host1, // 自动添加前缀，前缀会和上面的url合并
+            token    : false, // 该请求是否以来token
+            secondRun: false, // 发送失败后，是否再次发送第二次
         }
-    });
-};
-
-/**
- * 添加/更新/上传数据操作
- * @param data
- * @param callback
- * @returns {*|Promise<void>}
- */
-export const base2 = (data, callback) => {
-    return Http.post({
-        url    : "base2",
-        data,
-        callback,
-        options: {
-            baseURL  : host1,
-            secondRun: false, // 禁止因为发送超时,触发的二次发送请求
-        }
-    });
-};
-
-/**
- * 图片上传
- * @param formData
- * @param filePath
- * @param callback
- * @returns {*|void}
- */
-export const uploadImg = (formData, filePath, callback) => {
-    return Http.upload({
-        url     : "uploadImg",
-        filePath: filePath,
-        formData: formData,
-        options : {
-            baseUrl: host1,
-            name   : "img"
-        },
-        callback
     });
 };

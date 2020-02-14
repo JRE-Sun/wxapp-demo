@@ -134,14 +134,15 @@ Component({
                                 wx.getImageInfo({
                                     src     : view.url,
                                     success : (res) => {
+                                        console.log(res,'供后续裁减使用');
                                         // 获得一下图片信息，供后续裁减使用
                                         view.sWidth  = res.width;
                                         view.sHeight = res.height;
                                     },
                                     fail    : (error) => {
+                                        console.error(`getImageInfo ${view.url} failed, ${JSON.stringify(error)}`);
                                         // 如果图片坏了，则直接置空，防止坑爹的 canvas 画崩溃了
                                         view.url = "";
-                                        console.error(`getImageInfo ${view.url} failed, ${JSON.stringify(error)}`);
                                     },
                                     complete: () => {
                                         completeCount++;

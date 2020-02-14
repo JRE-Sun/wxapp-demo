@@ -15,7 +15,7 @@
                     class="canvas-write__delBtn">重写
             </button>
             <button catchtap="writeSubCanvas"
-                    class="canvas-write__subBtn">确定签名
+                    class="canvas-write__subBtn">确定
             </button>
         </view>
     </view>
