@@ -1,5 +1,134 @@
 module.exports = {
-    isTrue: function (a) {
-        return a;
-    }
+
+    parseInt2: function (num) {
+        return Math.floor(num) / 100
+    },
+
+    /**
+     * 订单状态转文字
+     * @param statu
+     * @returns {*|string}
+     */
+    getOrderStatuName: function (statu) {
+        var statusArray = [];
+        statusArray[9]  = '新订单';
+        statusArray[15] = '待服务';
+        statusArray[8]  = '已退款';
+        statusArray[20] = '退款中';
+        statusArray[18] = '已完成';
+        return statusArray[statu * 1] || '未知'
+    },
+
+    /**
+     * 意向状态转文字
+     * @param statu
+     * @returns {*|string}
+     */
+    getIntentionStatuName: function (statu) {
+        var statusArray = [];
+        statusArray[9]  = '新线索';
+        statusArray[15] = '待跟进';
+        statusArray[11] = '已流失';
+        statusArray[18] = '已签单';
+        return statusArray[statu * 1] || '未知'
+    },
+
+    /**
+     * 获取意向颜色
+     * @param statu
+     * @returns {*|string}
+     */
+    getIntentionStatuColor: function (statu) {
+        var statusArray = [];
+        statusArray[9]  = 'rgb(238,12,13)';
+        statusArray[15] = 'rgb(238,185,105)';
+        statusArray[11] = 'rgb(196,196,196)';
+        statusArray[18] = 'rgb(126,185,83)';
+        return statusArray[statu * 1] || '#CCC'
+    },
+
+    /**
+     * 获取 订单 颜色
+     * @param statu
+     * @returns {*|string}
+     */
+    getOrderStatuColor: function (statu) {
+        var statusArray = [];
+        statusArray[9]  = 'rgb(254,76,64)';
+        statusArray[15] = 'rgb(238,185,105)';
+        statusArray[8]  = 'rgb(204,204,204)';
+        statusArray[20] = 'rgb(204,204,204)'; // 退款中
+        statusArray[18] = 'rgb(66,190,86)';
+        return statusArray[statu * 1] || '#CCC'
+    },
+
+    // 电子合同状态
+    contractStatusTake: function (contractStatus) {
+        var obj = ['签署中', '已签名', '已完成'];
+        return obj[contractStatus * 1];
+    },
+    // 获取商家命名
+    getMerchantType   : function (auditStatus, type) {
+        var list = ['普通商家', '入驻商家', '会员商家', '联盟商家'], num = type;
+        if (auditStatus < 1) {
+            num--
+        }
+        return list[num]
+    },
+    // 获取商家打开页面
+    getMerchantOpen   : function (auditStatus, type) {
+        var path = '';
+        if (type === 0 && auditStatus === 1) {
+            path = 'apply/complete';
+        }
+        if (type === 1 && auditStatus !== 0) {
+            path = 'apply/complete?auditStatus=' + auditStatus;
+        }
+        if (type === 1 && auditStatus === 0) {
+            path = 'apply/check';
+        }
+        return path
+    },
+    /**
+     * 获取选择商家数组
+     */
+    getCheckArr       : function (shopList) {
+        var arr = [];
+        shopList.forEach(function (shop, index) {
+            if (shop.checked) {
+                arr.push(shop.shopId.toString())
+            }
+        });
+        return arr
+    },
+    /**
+     * 获取优惠券审核状态
+     */
+    getCheckStatus    : function (consoleStatus, key) {
+        var checkText = {
+            '-1': {
+                text : '已下线',
+                color: 'rgb(204,204,204)'
+            },
+            '0' : {
+                text : '待审批',
+                color: 'rgb(238,185,105)'
+            },
+            '1' : {
+                text : '被驳回',
+                color: 'rgb(253, 71, 67)'
+            },
+            '2' : {
+                text : '已通过',
+                color: 'rgb(66,190,86)'
+            },
+        };
+        return checkText[consoleStatus + ''][key]
+    },
+    /**
+     * 获取字符串前几位
+     */
+    substrIndex       : function (str, start, end) {
+        return str.substring(start, end)
+    },
 };

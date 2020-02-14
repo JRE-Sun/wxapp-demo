@@ -1,9 +1,0 @@
-<view catch:tap="storeAddClickCount"
-      style="height:50px;background:#fff">
-    此区域可点击增加count: count => {{ $store.count }}
-</view>
-    {{ $store.isLogin }}
-<button class="page__item font-16"
-        data-query="page/storePage3"
-        catch:tap="openPage">打开新页面
-</button>

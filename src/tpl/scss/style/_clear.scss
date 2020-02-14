@@ -1,32 +1,66 @@
-.clear-20, .clear-10, .clear-8, .clear-6 {
+.clear-40,
+.clear-20,
+.clear-16,
+.clear-12,
+.clear-30,
+.height-30 {
     background-color: $page-bg-color;
 }
 
-.clear-20 {
+.clear-40 {
     height: rpx(40);
 }
 
-.clear-10, .height-10 {
+.height-30,
+.clear-30 {
+    height: rpx(30);
+}
+
+.clear-20,
+.height-20 {
     height: rpx(20);
 }
 
-.clear-8, .height-8 {
+.clear-16,
+.height-16 {
     height: rpx(16);
 }
 
-.clear-6, .height-6 {
+.clear-12,
+.height-12 {
     height: rpx(12);
+}
+
+.clear-8,
+.height-8 {
+    height: rpx(8);
+}
+
+.clear-4,
+.height-4 {
+    height: rpx(4);
+}
+
+.line-none {
+    background: #f1f1f1;
+    height: rpx(4);
+    //transform: scaleY(.5);
+}
+
+.height-20 {
+    height: rpx(20);
 }
 
 .clear-line {
     text-align: center;
     overflow: hidden;
-    padding: rpx(14) 0 rpx(14) 0;
+    padding: rpx(9) 0 rpx(9) 0;
     text {
         display: inline-block;
         position: relative;
-        &:after, &:before {
-            content: '';
+        &:after,
+        &:before {
+            content: "";
             top: 50%;
             height: 1px;
             width: 100%;
@@ -34,12 +68,12 @@
             position: absolute;
         }
         &:after {
-            left: rpx(-20);
-            transform: translate(-100%, -50%) scaleY(.5);
+            left: rpx(-10);
+            transform: translate(-100%, -50%) scaleY(0.5);
         }
         &:before {
-            right: rpx(-20);
-            transform: translate(100%, -50%) scaleY(.5);
+            right: rpx(-10);
+            transform: translate(100%, -50%) scaleY(0.5);
         }
     }
 }

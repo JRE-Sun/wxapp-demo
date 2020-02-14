@@ -1,14 +1,19 @@
-import {Http} from './thread';
-import {host2} from './config';
+import {Http} from "./thread";
+import {mmApi} from "./config";
 
 /**
- * 某接口
+ * 获取城市列表
+ * @param data
  */
-export const getHappyGoodsList = (pageNum, callback) => {
+export const getCityList = callback => {
     return Http.post({
-        url    : 'api/a/user',
+        url    : "city/query",
         callback,
-        data   : {pageSize: 10, pageNum},
-        options: {baseURL: host2}
+        options: {
+            cache    : true, // 是否缓存该cache
+            cacheTime: 24 * 60 * 60, // 请求缓存时间,默认30分钟
+            baseURL  : mmApi,
+            token    : false, // 该请求是否携带token
+        }
     });
-}
+};

@@ -1,22 +1,7 @@
 {
   "pages": [
-    "pages/index/index",
-    "pages/page/newPage",
-    "pages/page/redirectPage",
-    "pages/page/storePage",
-    "pages/page/storePage2",
-    "pages/page/storePage3",
-    "pages/page/img",
-    "pages/page/toast",
-    "pages/page/share",
-    "pages/page/event"
+    "pages/index/index"
   ],
-  "window": {
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fcfcfc",
-    "navigationBarTitleText": "wxapp",
-    "navigationBarTextStyle": "black"
-  },
   "sitemapLocation": "sitemap.json",
   "permission": {
     "scope.userLocation": {

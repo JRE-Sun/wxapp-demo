@@ -1,8 +1,0 @@
-<template name="b">
-    <view class="b-tpl">
-        <button class="page__item font-16"
-                style="background:{{ b.msg===0 ? 'black' : 'red' }}"
-                catch:tap="bClickBtn">点击后{{ b.msg }}s后我会背景变成黑色哦
-        </button>
-    </view>
-</template>

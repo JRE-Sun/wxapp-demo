@@ -1,19 +1,66 @@
-import {log} from './config';
-import regeneratorRuntime from './runtime-module';
-import lodash from './lodash.min';
-
+import {appVersion, log} from "./config";
+import regeneratorRuntime from "./runtime-module";
+import lodash from "./lodash.min";
+import diffJs from "./diff";
 
 export const _     = lodash;
 export const merge = _.merge;
+export const wxObj = wx;
+/**
+ * diff算法
+ */
+export const diff  = diffJs;
+
+/**
+ * 页面间订阅者
+ */
+
+class Watch {
+    constructor() {
+        this.list = {};
+    }
+
+    static getInstance() {
+        if (this.obj) return this.obj;
+        this.obj = new Watch();
+        return this.obj;
+    }
+
+    on(key, callback) {
+        if (!this.list.hasOwnProperty(key)) {
+            this.list[key] = [];
+        }
+        if (this.list[key].indexOf(callback) > -1) return;
+        this.list[key].push(callback);
+    }
+
+    emit(key, value = null) {
+        if (!this.list.hasOwnProperty(key)) return;
+        this.list[key].forEach(n => {
+            n && n(value);
+        });
+    }
+
+    remove(key, callback) {
+        if (!this.list.hasOwnProperty(key)) return;
+        if (this.list[key].length === 0) return;
+        let index = this.list[key].indexOf(callback);
+        if (index === -1) return;
+        this.list[key].splice(index, 1);
+    }
+}
+
+export const watch = Watch.getInstance();
+
 
 /**
  * 通过require引入import写法文件,返回真实obj
  * @param path
  * @returns {*}
  */
-export const getImportObjByRequire = (path) => {
+export const getImportObjByRequire = path => {
     let data = require(path);
-    if (data.hasOwnProperty('default')) {
+    if (data.hasOwnProperty("default")) {
         data = data.default;
     }
     return data;
@@ -26,7 +73,7 @@ export const getImportObjByRequire = (path) => {
  * @return {{longitude: (number|*), latitude: (number|*)}}
  */
 export const tencent2baidu = (latitude, longitude) => {
-    let x_pi  = 3.14159265358979324 * 3000.0 / 180.0;
+    let x_pi  = (3.14159265358979324 * 3000.0) / 180.0;
     let x     = longitude;
     let y     = latitude;
     let z     = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * x_pi);
@@ -35,7 +82,7 @@ export const tencent2baidu = (latitude, longitude) => {
     let lats  = z * Math.sin(theta) + 0.006;
     return {
         longitude: lngs,
-        latitude : lats,
+        latitude : lats
     };
 };
 
@@ -43,8 +90,9 @@ export const tencent2baidu = (latitude, longitude) => {
  * 百度经纬度坐标转换腾讯坐标
  */
 export const badidu2tencent = (lat, lng) => {
-    let x_pi  = 3.14159265358979324 * 3000.0 / 180.0;
-    let x     = lng * 1 - 0.0065, y = lat * 1 - 0.006;
+    let x_pi  = (3.14159265358979324 * 3000.0) / 180.0;
+    let x     = lng * 1 - 0.0065,
+        y     = lat * 1 - 0.006;
     let z     = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);
     let theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * x_pi);
     lng       = z * Math.cos(theta);
@@ -52,8 +100,58 @@ export const badidu2tencent = (lat, lng) => {
     return {
         longitude: lng,
         latitude : lat
-    }
-}
+    };
+};
+
+/**
+ * 获取用户数据
+ * @param key
+ * @returns {*}
+ */
+export const getAppUserInfo = (key = null) => {
+    return getDataByStorage("userInfo", key);
+};
+
+/**
+ * 设置用户信息缓存
+ * @param key
+ * @param value
+ */
+export const setUserInfo = (key, value) => {
+    let userInfo  = getAppUserInfo();
+    userInfo[key] = value;
+    storage("userInfo", userInfo);
+};
+/**
+ * 获取商家数据
+ * @param key
+ * @returns {*}
+ */
+export const getMerchant = (key = null) => {
+    return getDataByStorage("merchant", key);
+};
+
+/**
+ * 设置商家信息缓存
+ * @param key
+ * @param value
+ */
+export const setMerchant = (key, value) => {
+    let merchant  = getMerchant();
+    merchant[key] = value;
+    storage("merchant", merchant);
+};
+
+/**
+ * 获取storage里面缓存的数据
+ * @param value
+ * @param key
+ * @returns {*}
+ */
+export const getDataByStorage = (value, key = null) => {
+    let data = storage(value) || {};
+    return key === null ? data : data[key] ? data[key] : false;
+};
 
 /**
  * showModal
@@ -61,7 +159,7 @@ export const badidu2tencent = (lat, lng) => {
  * @param content
  * @param callback
  */
-export const showModal = ({title = '标题', content = '内容', callback}) => {
+export const showModal = ({title = "标题", content = "内容", callback}) => {
     wxObj.showModal({
         title,
         content,
@@ -72,16 +170,15 @@ export const showModal = ({title = '标题', content = '内容', callback}) => {
             }
             callback(false);
         }
-    })
+    });
 };
-
 
 /**
  * 检查是否为Debug模式,来动态显示隐藏console
  */
-export const checkDebug = (debugKey = '_debug') => {
+export const checkDebug = (debugKey = "_debug") => {
     if (log) {
-        storage('_debug', true, 30 * 60);
+        storage("_debug", true, 30 * 60);
         return;
     }
     if (!storage(debugKey)) {
@@ -99,7 +196,6 @@ export const closeConsole = () => {
     };
 };
 
-
 /**
  * 计算两个点的距离距离
  * @param location1 第一点的纬度，经度；
@@ -108,7 +204,7 @@ export const closeConsole = () => {
  */
 export const getDisByLocation = (location1, Location2) => {
     function Rad(d) {
-        return d * Math.PI / 180.0;
+        return (d * Math.PI) / 180.0;
     }
 
     let lat1    = location1.latitude;
@@ -119,10 +215,18 @@ export const getDisByLocation = (location1, Location2) => {
     let radLat2 = Rad(lat2);
     let a       = radLat1 - radLat2;
     let b       = Rad(lng1) - Rad(lng2);
-    let s       = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) +
-        Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+    let s       =
+            2 *
+            Math.asin(
+                Math.sqrt(
+                    Math.pow(Math.sin(a / 2), 2) +
+                    Math.cos(radLat1) *
+                    Math.cos(radLat2) *
+                    Math.pow(Math.sin(b / 2), 2)
+                )
+            );
 
-    s = s * 6378.137;// EARTH_RADIUS;
+    s = s * 6378.137; // EARTH_RADIUS;
     s = Math.round(s * 10000) / 10000; //输出为公里
     //s=s.toFixed(4);
     return s;
@@ -165,15 +269,16 @@ export const getDateDay = (year, month, day) => {
  * @return {*}
  */
 export const storage = (key, data = null, duration = null) => {
+    if (key === null) return false;
     if (data === null) {
         try {
-            data = wx.getStorageSync(key) || false;
+            data = wxObj.getStorageSync(key) || false;
             // 走判断时间逻辑
             if (data && data.duration) {
                 let currTime = Math.ceil(new Date().getTime() / 1000);
                 if (currTime >= data.duration) {
                     data = false;
-                    wx.setStorageSync(key, false);
+                    wxObj.setStorageSync(key, false);
                 } else {
                     data = data[key];
                 }
@@ -187,7 +292,7 @@ export const storage = (key, data = null, duration = null) => {
     try {
         // 当没有设置时间,直接存
         if (!duration) {
-            wx.setStorageSync(key, data);
+            wxObj.setStorageSync(key, data);
             return;
         }
         // 设置了缓存时间
@@ -195,9 +300,9 @@ export const storage = (key, data = null, duration = null) => {
         obj[key]     = data;
         //  在 duration 时间过期,传进来的是秒,例如 保存 30s
         obj.duration = Math.ceil(new Date().getTime() / 1000) + duration * 1;
-        wx.setStorageSync(key, obj);
+        wxObj.setStorageSync(key, obj);
     } catch (e) {
-        console.log('缓存失败', e);
+        console.log("缓存失败", e);
     }
 };
 
@@ -209,23 +314,28 @@ export const storage = (key, data = null, duration = null) => {
  * @return {number}
  */
 export const getSecondByTwoTimer = (startTime, endTime, callback) => {
-    if (Object.prototype.toString.call(startTime).search(/String/) > -1 && startTime.search(/-/g) > -1) {
-        let endStr = '.0';
+    if (
+        Object.prototype.toString.call(startTime).search(/String/) > -1 &&
+        startTime.search(/-/g) > -1
+    ) {
+        let endStr = ".0";
         let d      = startTime.length - endStr.length;
         if (d >= 0 && startTime.lastIndexOf(endStr) === d) {
             startTime = startTime.substr(0, startTime.length - 2);
         }
-        startTime = startTime.replace(/-/g, '/');
+        startTime = startTime.replace(/-/g, "/");
         startTime = new Date(startTime).getTime();
     }
-    if (Object.prototype.toString.call(endTime).search(/String/) > -1 && endTime.search(/-/) > -1) {
-        endTime = endTime.replace(/-/g, '/');
+    if (
+        Object.prototype.toString.call(endTime).search(/String/) > -1 &&
+        endTime.search(/-/) > -1
+    ) {
+        endTime = endTime.replace(/-/g, "/");
         endTime = new Date(endTime).getTime();
     }
     callback && callback(startTime, endTime);
     return endTime - startTime;
 };
-
 
 /**
  * 根据毫秒,获取=>{day,hour,minute,second}
@@ -237,13 +347,17 @@ export const formatMillis = (milliSecond, callback) => {
     let leftSecond = parseInt(milliSecond / 1000);
     let day        = Math.floor(leftSecond / (60 * 60 * 24));
     let hour       = Math.floor((leftSecond - day * 24 * 60 * 60) / 3600);
-    let minute     = Math.floor((leftSecond - day * 24 * 60 * 60 - hour * 3600) / 60);
-    let second     = Math.floor(leftSecond - day * 24 * 60 * 60 - hour * 3600 - minute * 60);
+    let minute     = Math.floor(
+        (leftSecond - day * 24 * 60 * 60 - hour * 3600) / 60
+    );
+    let second     = Math.floor(
+        leftSecond - day * 24 * 60 * 60 - hour * 3600 - minute * 60
+    );
     let timeObj    = {
         day,
-        hour  : hour < 10 ? '0' + hour : hour,
-        minute: minute < 10 ? '0' + minute : minute,
-        second: second < 10 ? '0' + second : second,
+        hour  : hour < 10 ? "0" + hour : hour,
+        minute: minute < 10 ? "0" + minute : minute,
+        second: second < 10 ? "0" + second : second
     };
     callback && callback(timeObj);
     return timeObj;
@@ -257,7 +371,7 @@ export const compose = (...args) => {
         if (i <= 0) return result;
         i--;
         return f.call(null, result);
-    }
+    };
 };
 
 /**
@@ -273,12 +387,11 @@ export const curry = fn => {
         if (fn.length > args.length) {
             return function () {
                 return fn1.apply(null, args.concat(...arguments));
-            }
+            };
         }
         return fn.apply(null, args);
-    }
+    };
 };
-
 
 /**
  * 删除数组里keys
@@ -288,7 +401,6 @@ export const deleteArrayKeys = (array, keys) => {
         return deleteKeys(n, keys);
     });
 };
-
 
 /**
  * 删除对象里keys
@@ -318,9 +430,8 @@ export const pipe = (...fn) => {
         }
         i++;
         return fn1.call(null, result);
-    }
+    };
 };
-
 
 /**
  * Monad函子
@@ -335,7 +446,7 @@ Maybe.of = function (value) {
 };
 
 Maybe.prototype.isNothing = function () {
-    return (this.val === null || this.val === void 0);
+    return this.val === null || this.val === void 0;
 };
 
 Maybe.prototype.join = function () {
@@ -355,8 +466,8 @@ Maybe.prototype.chain = function (fn) {
 };
 
 export const _typeOf = function (val) {
-    return Object.prototype.toString.call(val)
-}
+    return Object.prototype.toString.call(val);
+};
 
 export const jsonString = data => {
     try {
@@ -365,7 +476,7 @@ export const jsonString = data => {
         }
         data = JSON.stringify(data);
     } catch (e) {
-        console.error('util.jsonString参数错误,必须为json对象或者json字符串');
+        console.error("util.jsonString参数错误,必须为json对象或者json字符串");
         data = JSON.stringify({});
     }
     return data;
@@ -381,7 +492,14 @@ export const jsonString = data => {
  * @param query
  * @return {{imageUrl: *, title: *}}
  */
-export const initShareOptions = ({img, title, insert, track, path, query}) => {
+export const initShareOptions = ({
+                                     img,
+                                     title,
+                                     insert,
+                                     track,
+                                     path,
+                                     query
+                                 }) => {
     let shareOption = {
         imageUrl: img,
         title   : title
@@ -392,14 +510,14 @@ export const initShareOptions = ({img, title, insert, track, path, query}) => {
         if (track) {
             // 有track
             param = `?track=${track}&&redirect=${path}&&params=${query}`;
-            console.error(param, '插入 特定 前缀页---有track');
+            console.error(param, "插入 特定 前缀页---有track");
         } else {
             // 无
             param = `?redirect=${path}&&params=${query}`;
-            console.error(param, '插入 特定 前缀页---无track');
+            console.error(param, "插入 特定 前缀页---无track");
         }
         shareOption.path = `/pages/${insert}${param}`;
-        console.error('最后转发的全部路径:', shareOption);
+        console.error("最后转发的全部路径:", shareOption);
         return shareOption;
     }
     // 不插 前缀页
@@ -407,112 +525,38 @@ export const initShareOptions = ({img, title, insert, track, path, query}) => {
     if (track) {
         // 有track
         param = `?params=${query}&&track=${track}`;
-        console.error(param, '不插 前缀页---有track');
+        console.error(param, "不插 前缀页---有track");
     } else {
         // 无
         param = `?params=${query}`;
-        console.error(param, '不插 前缀页---无track');
+        console.error(param, "不插 前缀页---无track");
     }
     shareOption.path = `/${path}${param}`;
-    console.error('最后转发的全部路径:', shareOption);
+    console.error("最后转发的全部路径:", shareOption);
     return shareOption;
 };
 
-
 export const isObject = val => {
-    return _typeOf(val).search('Object') > -1;
+    return _typeOf(val).search("Object") > -1;
 };
 
 export const isString = val => {
-    return _typeOf(val).search('String') > -1;
+    return _typeOf(val).search("String") > -1;
 };
 
-
-export const isArray          = arr => {
-    return _typeOf(arr).search('Array') > -1;
+export const isArray        = arr => {
+    return _typeOf(arr).search("Array") > -1;
 };
 export const getArrayLength = arr => {
     if (!isArray(arr)) return null;
     return arr.length > 0 ? arr : null;
 };
-export const arrFirst         = arr => {
+export const arrFirst       = arr => {
     if (!isArray(arr)) return null;
     if (arr.length === 0) return null;
     return arr[0];
 };
-export const maybeMap         = curry((fn, maybe) => maybe.map(fn));
-
-const TYPE_ARRAY  = '[object Array]'
-const TYPE_OBJECT = '[object Object]'
-
-/**
- * diff算法
- * @author 逍遥
- */
-export const addDiff = function addDiff(
-    current = {},
-    prev    = {},
-    root    = '',
-    result  = {}
-) {
-    Object.entries(current).forEach(item => {
-        let key   = item[0],
-            value = item[1],
-            path  = root === '' ? key : root + '.' + key
-        if (_typeOf(current) === TYPE_ARRAY) {
-            path = root === '' ? key : root + '[' + key + ']'
-        }
-
-        if (!prev.hasOwnProperty(key)) {
-            result[path] = value
-        } else if (
-            (_typeOf(prev[key]) === TYPE_OBJECT &&
-                _typeOf(current[key]) === TYPE_OBJECT) ||
-            (_typeOf(prev[key]) === TYPE_ARRAY &&
-                _typeOf(current[key]) === TYPE_ARRAY)
-        ) {
-            addDiff(current[key], prev[key], path, result)
-        } else if (prev[key] !== current[key]) {
-            result[path] = value
-        }
-    })
-    return result;
-}
-
-export const nullDiff = function nullDiff(
-    current = {},
-    prev    = {},
-    root    = '',
-    result  = {}
-) {
-    Object.entries(prev).forEach(item => {
-        let key   = item[0],
-            value = item[1],
-            path  = root === '' ? key : root + '.' + key
-        if (_typeOf(current) === TYPE_ARRAY) {
-            path = root === '' ? key : root + '[' + key + ']'
-        }
-
-        if (!current.hasOwnProperty(key)) {
-            result[path] = null
-        } else if (
-            (_typeOf(prev[key]) === TYPE_OBJECT &&
-                _typeOf(current[key]) === TYPE_OBJECT) ||
-            (_typeOf(prev[key]) === TYPE_ARRAY &&
-                _typeOf(current[key]) === TYPE_ARRAY)
-        ) {
-            nullDiff(current[key], prev[key], path, result)
-        }
-    })
-    return result;
-}
-
-export const diff = function diff(current = {}, prev = {}) {
-    let result = {};
-    addDiff(current, prev, '', result);
-    nullDiff(current, prev, '', result);
-    return result;
-};
+export const maybeMap       = curry((fn, maybe) => maybe.map(fn));
 
 /**
  * 极简深拷贝 => 不能属性是函数
@@ -520,13 +564,13 @@ export const diff = function diff(current = {}, prev = {}) {
  * @return {any}
  */
 export const deepClone = data => {
-    if (typeof data === 'undefined' || typeof data !== 'object') {
+    if (typeof data === "undefined" || typeof data !== "object") {
         return data;
     }
     try {
         data = JSON.parse(JSON.stringify(data));
     } catch (e) {
-        console.error(e, '深拷贝数据错误!');
+        console.error(e, "深拷贝数据错误!");
         data = false;
     }
     return data;
@@ -541,48 +585,58 @@ export const deepClone = data => {
  * @param name
  * @param type
  */
-export const openMap = ({longitude = '', latitude = '', address = '', name = '', type = 'baidu'} = {}) => {
+export const openMap = ({
+                            longitude = "",
+                            latitude = "",
+                            address = "",
+                            name = "",
+                            type = "baidu"
+                        } = {}) => {
     if (longitude === "" || latitude === "") {
-        showToast('error', '地址错误');
+        showToast("error", "地址错误");
         return;
     }
     let shopLocation = {};
     switch (type) {
-        case 'baidu':
+        case "baidu":
             shopLocation = badiDu2Tencent(latitude, longitude);
             break;
-        case 'tencent':
+        case "tencent":
             shopLocation.latitude  = latitude;
             shopLocation.longitude = longitude;
             break;
     }
-    wx.openLocation({
+    wxObj.openLocation({
         latitude : shopLocation.latitude,
         longitude: shopLocation.longitude,
         scale    : 18,
         address,
         name
-    })
+    });
 };
-
 
 /**
  * 检查是否有保存图片权限,如果没有直接打开授权页
  * @return {Promise<any>}
  */
+// const wxObj=wx;
+
 export const checkImgSetting = () => {
     return new Promise((a, b) => {
-        wx.getSetting({
+        wxObj.getSetting({
             success(res) {
                 let imgSet = res.authSetting['scope.writePhotosAlbum'];
+
                 if (imgSet === false) {
-                    wx.openSetting({});
+                    console.log('res', res, imgSet === false)
+                    wxObj.openSetting({});
                     a(false);
                     return;
                 }
                 a(true);
             },
-            fail() {
+            fail(e) {
+                console.log('error', e)
                 a(false);
             }
         });
@@ -595,21 +649,22 @@ export const checkImgSetting = () => {
  * @param callback
  */
 export const downloadImg = (url, callback) => {
-    if (url.indexOf('https') === -1) {
-        url = url.replace(/http/ig, 'https');
+    if (url.indexOf("https") === -1) {
+        url = url.replace(/http/gi, "https");
     }
-    wx.downloadFile({
+    console.log(url, '下载图片地址')
+    wxObj.downloadFile({
         url    : url,
         success: function (res) {
-            wx.saveFile({
+            wxObj.saveFile({
                 tempFilePath: res.tempFilePath,
-                success     : (fileRes) => {
+                success     : fileRes => {
                     callback(fileRes);
                 },
                 fail(fileRes) {
                     callback(fileRes);
                 }
-            })
+            });
         },
         fail(fileRes) {
             callback(fileRes);
@@ -623,23 +678,26 @@ export const downloadImg = (url, callback) => {
  * @param title
  * @param duration
  */
-export const showToast = (type = 'loading', title = '拼命加载中', duration = 1500) => {
+export const showToast = (
+    type     = "loading",
+    title    = "拼命加载中",
+    duration = 1500
+) => {
     let options = {
-        duration: type === 'loading' ? 1000000 : duration,
+        duration: type === "loading" ? 1000000 : duration,
         title,
         mark    : true
     };
-    if (type === 'error') {
-        options.image = '../../image/error.png';
-        if (title === '拼命加载中') {
-            options.title = '加载失败';
+    if (type === "error") {
+        options.image = "../../image/error.png";
+        if (title === "拼命加载中") {
+            options.title = "加载失败";
         }
     } else {
         options.icon = type;
     }
-    wx.showToast(options);
+    wxObj.showToast(options);
 };
-
 
 /**
  * 1. 当返回的typeof是undefined    用户首次进来,弹出授权框,此时不知道有没有授权
@@ -651,8 +709,8 @@ export const showToast = (type = 'loading', title = '拼命加载中', duration 
 export const getLocationSet = () => {
     let status = void 0;
     try {
-        status = wxObj.getStorageSync('locationSet');
-        if (typeof status === 'string' && status.length === 0) {
+        status = wxObj.getStorageSync("locationSet");
+        if (typeof status === "string" && status.length === 0) {
             status = void 0;
         }
     } catch (e) {
@@ -662,9 +720,9 @@ export const getLocationSet = () => {
         if (status !== void 0) return a(status);
         wxObj.getSetting({
             success(res) {
-                status = res.authSetting['scope.userLocation'];
+                status = res.authSetting["scope.userLocation"];
                 if (status !== void 0) {
-                    storage('locationSet', status);
+                    storage("locationSet", status);
                 }
                 a(status);
             },
@@ -675,20 +733,19 @@ export const getLocationSet = () => {
     });
 };
 
-
 /**
  * 更新app
  */
 export const updateApp = () => {
-    let updateManager = wx.getUpdateManager();
+    let updateManager = wxObj.getUpdateManager();
     updateManager.onCheckForUpdate(function (res) {
         // 请求完新版本信息的回调
     });
     updateManager.onUpdateReady(function () {
         let showUpdateModal = () => {
-            wx.showModal({
-                title  : '更新提示',
-                content: '新版本已经准备好，是否重启应用？',
+            wxObj.showModal({
+                title  : "更新提示",
+                content: "新版本已经准备好，是否重启应用？",
                 success: function (res) {
                     if (res.confirm) {
                         // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
@@ -697,7 +754,7 @@ export const updateApp = () => {
                     }
                     showUpdateModal();
                 }
-            })
+            });
         };
         showUpdateModal();
     });
@@ -710,14 +767,14 @@ export const updateApp = () => {
  * 隐藏右上角分享
  */
 export const hideShareMenu = () => {
-    wx.hideShareMenu();
+    wxObj.hideShareMenu();
 };
 
 /**
  * 显示右上角分享
  */
 export const showShareMenu = () => {
-    wx.showShareMenu();
+    wxObj.showShareMenu();
 };
 
 /**
@@ -731,17 +788,20 @@ export const formatDataByDiff = (key, newValue, oldValue) => {
     if (isArray(oldValue)) {
         return {[key]: newValue};
     }
-    console.log(key, newValue, oldValue, 'key, newValue, oldValue');
+    console.log(key, newValue, oldValue, "key, newValue, oldValue");
     let diffData = diff(newValue, oldValue);
-    console.log(diffData, 'diffData');
+    console.log(diffData, "diffData");
     let diffObj = {};
     Object.keys(diffData).forEach(n => {
         // 0.a
-        let m = n.split('.').map(n => {
+        let m = n
+        .split(".")
+        .map(n => {
             // 非文字
             // Number.isNaN(n * 1)
             return Number.isNaN(n * 1) ? n : `[${n}]`;
-        }).join('.');
+        })
+        .join(".");
 
         diffObj[`${key}.${m}`] = deepClone(diffData[n]);
     });
@@ -757,11 +817,18 @@ export const formatDataByDiff = (key, newValue, oldValue) => {
  */
 export const getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
     return new Promise((a, b) => {
-        wx.request({
-            url    : 'https://api.map.baidu.com/geocoder/v2/?ak=' + ak + '&location=' + latitude + ',' + longitude + '&output=json',
+        wxObj.request({
+            url    :
+                "https://api.map.baidu.com/geocoder/v2/?ak=" +
+                ak +
+                "&location=" +
+                latitude +
+                "," +
+                longitude +
+                "&output=json",
             data   : {},
             header : {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json"
             },
             success: function (res) {
                 if (res.status * 1 === 0) {
@@ -772,11 +839,10 @@ export const getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
             },
             fail   : function (error) {
                 a(error);
-            },
-        })
+            }
+        });
     });
 };
-
 
 /**
  * 监听网络变化
@@ -785,19 +851,19 @@ export const getCityInfoByBaiDu = async ({latitude, longitude, ak}) => {
  */
 export const networkChangeEvent = callback => {
     return new Promise((a, b) => {
-        wx.onNetworkStatusChange(res => {
+        wxObj.onNetworkStatusChange(res => {
             // ['4g', '3g', 'wifi'].indexOf(res.networkType) === -1
-            if (!res.isConnected || res.networkType === 'none') {
+            if (!res.isConnected || res.networkType === "none") {
                 callback();
                 a(false);
                 return;
             }
             a(true);
         });
-        wx.getNetworkType({
+        wxObj.getNetworkType({
             success(res) {
                 // ['4g', '3g', 'wifi'].indexOf(res.networkType) === -1
-                if (res.networkType === 'none') {
+                if (res.networkType === "none") {
                     callback();
                     a(false);
                     return;
@@ -815,30 +881,34 @@ export const networkChangeEvent = callback => {
  * 隐藏toast
  */
 export const hideToast = () => {
-    wx.hideToast();
+    wxObj.hideToast();
 };
 
 /**
  * 保存图片到本地
  * @return {Promise<void>}
  */
-export const saveImageToAlbum = async (path) => {
-    showToast('loading', '保存中..');
+export const saveImageToAlbum = async path => {
+    showToast("loading", "保存中..");
+    // if (path.indexOf('https') === -1) {
+    //     path = path.replace(/http/ig, 'https');
+    // }
+    console.log(path, await checkImgSetting(), '图片地址');
     // 没有权限会自动跳转 授权页面
     if (!await checkImgSetting()) {
         hideToast();
         return;
     }
     // 获取权限成功
-    wx.saveImageToPhotosAlbum({
+    wxObj.saveImageToPhotosAlbum({
         filePath: path,
         success(res) {
             console.log('保存成功', res);
             showToast('success', '保存成功');
         },
-        fail(res) {
+        async fail(res) {
             console.log('保存失败', res);
-            checkImgSetting();
+            await checkImgSetting();
             showToast('error', '保存失败');
         }
     });
@@ -849,12 +919,12 @@ export const saveImageToAlbum = async (path) => {
  * @param {*} select
  */
 export const querySelector = select => {
-    let query = wx.createSelectorQuery();
+    let query = wxObj.createSelectorQuery();
     query.select(select).boundingClientRect();
     return new Promise((a, b) => {
         query.exec(res => {
             a(res[0]);
-        })
+        });
     });
 };
 
@@ -863,7 +933,44 @@ export const querySelector = select => {
  * @param navTitle
  */
 export const setNavTitle = navTitle => {
-    wx.setNavigationBarTitle({
-        title: navTitle,
+    wxObj.setNavigationBarTitle({
+        title: navTitle
     });
+};
+// 复制
+export const copyEvent   = (url, title, showFalse = true) => {
+    let copyApi = (data) => {
+        wxObj.setClipboardData({
+            data,
+            success(res) {
+                console.log('复制成功', res);
+            }
+        })
+    }
+    if (!showFalse) {
+        return copyApi(url);
+    }
+    wxObj.showModal({
+        title     : '提示',
+        content   : title,
+        showCancel: false,
+        success(res) {
+            copyApi(url);
+        }
+    });
+};
+// 打开妈妈身边
+export const openApp     = (path) => {
+    wxObj.navigateToMiniProgram({
+        appId     : 'wx3a1ce624e659533a',
+        path      : `pages/${path}`,
+        envVersion: appVersion,
+        success(res) {
+            // 打开成功
+        },
+        fail(res) {
+            console.log('打开妈妈身边', res);
+            showToast("error", "打开失败 !");
+        }
+    })
 };

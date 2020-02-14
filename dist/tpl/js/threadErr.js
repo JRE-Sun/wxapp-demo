@@ -1,11 +1,11 @@
-import {Http, threadErr} from '../../utils/thread';
+import { Http, threadErr } from "../../utils/thread";
 
 export default {
     data: {},
-    mix : {
+    mix: {
         pageErrTimer: null, // 错误日志timer
-        __event     : {
-            pageOnError: ['pageSendErrLog']
+        __event: {
+            pageOnError: ["pageSendErrLog"]
         }
     },
 
@@ -25,5 +25,5 @@ export default {
             return;
         }
         threadErr.sendErrLog();
-    },
+    }
 };

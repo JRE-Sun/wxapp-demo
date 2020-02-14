@@ -1,48 +1,161 @@
+.font-0 {
+    font-size: 0;
+}
 
+.font-16 {
+    font-size: 32px;
+}
+.font-14 {
+    font-size: 14px !important;
+}
+.font-18 {
+    font-size: rpx(18)!important;
+}
+
+.font-20 {
+    font-size: rpx(20) !important;
+}
+
+.font-22 {
+    font-size: rpx(22) !important;
+}
+
+.font-24 {
+    font-size: rpx(24) !important;
+}
+
+.font-26 {
+    font-size: rpx(26) !important;
+}
+
+.font-28 {
+    font-size: rpx(28) !important;
+}
+
+.font-32 {
+    font-size: rpx(32) !important;
+}
+
+.font-36 {
+    font-size: rpx(36) !important;
+}
+
+.font-40 {
+    font-size: rpx(40) !important;
+}
+
+.font-42 {
+    font-size: rpx(42);
+}
+
+.font-30 {
+    font-size: rpx(30) !important;
+}
+
+.font-32 {
+    font-size: rpx(32) !important;
+}
+
+.font-48 {
+    font-size: rpx(48) !important;
+}
+
+.font-50 {
+    font-size: rpx(50) !important;
+}
+
+.color-252 {
+    color: $color-252;
+}
+
+.color-204 {
+    color: rgb(204, 204, 204);
+}
+
+.color-153 {
+    color: $color-153;
+}
+
+
+// .color-orange {
+//     color: $color-orange;
+// }
+
+// .color-2537167 {
+//     color: $color-2537167;
+// }
+
+.color-102 {
+    color: $color-102;
+}
+
+.color-333 {
+    color: #333;
+}
+
+.color-666 {
+    color: #666;
+}
+
+.color-999 {
+    color: #999;
+}
+
+.color-204 {
+    color: rgb(204, 204, 204);
+}
+
+.color-51 {
+    color: $color-51;
+}
+
+.color-notice {
+    color: $color-orange;
+}
+.color-active{
+    color: $color-active105;
+}
+.color-red{
+    color: $color-2537167;
+}
+
+.color-6893126 {
+    color: $color-716480;
+}
+
+.color-gray {
+    color: rgb(51, 51, 51);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.font-bold,
 .bold {
     font-weight: bold;
 }
 
-.font-10 {
-    font-size: rpx(20);
+.text-through {
+    text-decoration: line-through;
 }
 
-.font-11 {
-    font-size: rpx(22);
+.text-underline {
+    text-decoration: underline;
 }
 
-.font-12 {
-    font-size: rpx(24);
+.weight-normal {
+    font-weight: normal;
 }
 
-.font-15 {
-    font-size: rpx(30);
-}
-
-.font-13 {
-    font-size: rpx(26) !important;
-}
-
-.font-14 {
-    font-size: rpx(28);
-}
-
-.font-18 {
-    font-size: rpx(36);
-}
-
-.font-20 {
-    font-size: rpx(40);
-}
-
-.font-15 {
-    font-size: rpx(30);
-}
-
-.font-16 {
-    font-size: rpx(32);
-}
-
-.text-align {
-    text-align: center;
+.normal {
+    font-weight: normal;
 }

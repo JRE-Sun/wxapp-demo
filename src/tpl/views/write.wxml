@@ -1,0 +1,22 @@
+<template name="write">
+    <view class="canvas-write">
+        <view class="canvas-write__content">
+            <canvas class="canvas-write__canvas"
+                    disable-scroll="true"
+                    bindtouchstart="writeUploadScaleStart"
+                    bindtouchmove="writeUploadScaleMove"
+                    bindtouchend="writeUploadScaleEnd"
+                    bindtap="writeMouseDown"
+                    canvas-id="canvas-write__canvas">
+            </canvas>
+        </view>
+        <view class="canvas-write__btn-group">
+            <button catchtap="writeRetDraw"
+                    class="canvas-write__delBtn">重写
+            </button>
+            <button catchtap="writeSubCanvas"
+                    class="canvas-write__subBtn">确定签名
+            </button>
+        </view>
+    </view>
+</template>

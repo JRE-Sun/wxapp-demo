@@ -1,7 +1,0 @@
-<wxs src="../../utils/util.wxs" module="util"/>
-<template name="a">
-<view class="tpl-a">
-    <button class="page__item font-16">{{ a.msg }}</button>
-    <!--<view>我是不是a组件 {{ util.isTrue(a) }}</view>-->
-</view>
-</template>

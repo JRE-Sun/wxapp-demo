@@ -1,5 +1,6 @@
-import {http} from './config';
-import {merge, _, getImportObjByRequire} from './util';
+import {http} from "./config";
+import {merge, _, getImportObjByRequire} from "./util";
+import defaultMethods from "./default";
 
 let openThreadErr = http.openThreadErr || false;
 export default {
@@ -15,9 +16,9 @@ export default {
         });
         runEventArray.forEach(n => {
             let currRunEvent = n.__event;
-            if (typeof currRunEvent === 'undefined') return;
+            if (typeof currRunEvent === "undefined") return;
             for (let key in currRunEvent) {
-                if (typeof runEvent[key] === 'undefined') runEvent[key] = [];
+                if (typeof runEvent[key] === "undefined") runEvent[key] = [];
                 runEvent[key] = runEvent[key].concat(currRunEvent[key]);
             }
         });
@@ -26,17 +27,24 @@ export default {
         }
         return mergeTplJs;
     },
+    addPageMethods(pageName, data) {
+        if (!defaultMethods.hasOwnProperty(pageName)) return data;
+        let pageMethodList = defaultMethods[pageName];
+        Object.keys(pageMethodList).forEach(n => {
+            data[n] = pageMethodList[n];
+        });
+        return data;
+    },
     runPage(setting, tplUrlName = []) {
         let mergeTplJs = {};
-        openThreadErr && tplUrlName.push('threadErr');
-        tplUrlName.push('default');
+        openThreadErr && tplUrlName.push("threadErr");
+        tplUrlName.push("login");
+        tplUrlName.push("run");
         if (tplUrlName.length !== 0) {
             mergeTplJs = this.mergeConfig(tplUrlName);
         }
-
-        if (tplUrlName.length !== 0) {
-            mergeTplJs = this.mergeConfig(tplUrlName);
-        }
+        let pageName = setting.hasOwnProperty('name') ? setting.name : null;
+        setting      = this.addPageMethods(pageName, setting);
         let mergeRunEvent;
         let settingRunEvent;
         if (mergeTplJs.mix) {
@@ -45,7 +53,10 @@ export default {
         if (setting.mix) {
             settingRunEvent = setting.mix.__event || {};
         }
-        let __event = _.mergeWith(mergeRunEvent, settingRunEvent, function (a, b) {
+        let __event = _.mergeWith(mergeRunEvent, settingRunEvent, function (
+            a,
+            b
+        ) {
             if (_.isArray(a) && _.isArray(b)) {
                 return a.concat(b);
             }
@@ -57,4 +68,4 @@ export default {
         setting = merge({}, getImportObjByRequire(`./share`), setting);
         Page(setting);
     }
-};  
+};

@@ -6,27 +6,118 @@
 @import "./style/fixed";
 @import "./style/position";
 @import "./style/margin";
-// a 组件scss
-@import "./a";
-// b 组件scss
-@import "./b";
+@import "./style/bg";
+@import "./style/iconfont";
 
 image {
     margin: 0 auto;
 }
-
-img, view, swiper, swiper-item, page, text {
+img,
+view,
+swiper,
+swiper-item,
+page,
+text {
     box-sizing: border-box;
+}
+.button-none{
+    margin: 0;
+    padding: 0;
+    border: 0 solid transparent;  //自定义边框
+    outline: none;    //消除默认点击蓝色边框效果
+    background: none;
+    line-height: normal;
+    border-radius: 0;
+    &:after,&:before{
+        border: none;
+    }
+}
+// 设置通用按钮
+.btn-com{
+    height: 60px;
+    line-height: 60px;
+    border-radius: 5px;
+    color: $color-252;
+    background: $color-716480;
+    font-size: 32px;
+    text-align: center;
 }
 
 // 页面公有样式 page__item
 .page__item {
-    letter-spacing: rpx(.8);
+    letter-spacing: rpx(0.8);
     padding: rpx(10) 0;
     border-radius: rpx(4);
     font-weight: 500;
     margin-top: rpx(30);
     &:nth-child(1) {
         margin-top: 0;
+    }
+}
+.text-hide {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 1;
+}
+
+.text-hide-2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.text-hide-3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.text-hide-4 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+// 全屏透明遮罩层
+.hidden-mask {
+    opacity: 0;
+    transition: 0.3s;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+    &.active {
+        opacity: 1;
+        z-index: 99;
+    }
+}
+.border-bottom {
+    border-bottom: rpx(1) solid $color-238;
+}
+.box-shadow-153 {
+    box-shadow: 0 0 rpx(22) rgba(153, 153, 153, 0.2);
+}
+
+.box-shadow-102 {
+    box-shadow: 0 rpx(5) rpx(28) rpx(8) rgba(102, 102, 102, 0.3);
+}
+.box-shadow-102-1 {
+    box-shadow: 0 0 8px 8px rgba(102, 102, 102, 0.07);
+}
+// 全屏透明遮罩层
+.hidden-mask {
+    opacity: 0;
+    transition: .3s;
+    background-color: rgba(0, 0, 0, .6);
+    z-index: -1;
+    &.active {
+        opacity: 1;
+        z-index: 99;
     }
 }

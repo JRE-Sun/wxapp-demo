@@ -13,12 +13,12 @@
 	},
 	"compileType": "miniprogram",
 	"libVersion": "2.3.0",
-	"appid": "wxfa748f6e1fc9477f",
+	"appid": "wxd86a1f78d0d6c620",
 	"debugOptions": {
 		"hidedInDevtools": []
 	},
 	"isGameTourist": false,
-	"projectname": "wxapp",
+	"projectname": "身边管家",
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},
 	"condition": {

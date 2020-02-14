@@ -34,13 +34,13 @@ const config = {
     }
 };
 
-for (let fileKey in config.file) {
-    // 清理编译目录
-    gulp.task("clean" + fileKey, function (e) {
-        return gulp.src('dist' + config.file[fileKey])
-                   .pipe(clean());
-    });
-}
+// for (let fileKey in config.file) {
+//     // 清理编译目录
+//     gulp.task("clean" + fileKey, function (e) {
+//         return gulp.src('dist' + config.file[fileKey])
+//                    .pipe(clean());
+//     });
+// }
 
 // 清理编译目录
 gulp.task("clean", function (e) {
@@ -49,7 +49,7 @@ gulp.task("clean", function (e) {
                .pipe(clean());
 });
 
-gulp.task('sass', ['cleanwxss'], function () {
+gulp.task('sass', function () {
     return gulp.src('src/**/*.scss')
                .pipe(plumber({
                    errorHandler: function (error) {
@@ -67,16 +67,14 @@ gulp.task('sass', ['cleanwxss'], function () {
                    wxappScreenWidth: 750, // 微信小程序屏幕, 默认750
                    remPrecision    : 6 // 小数精度, 默认6
                }))
-               .pipe(changed('src'))
-               .pipe(debug())
                .pipe(rename((path) => path.extname = '.wxss')) //重命名
+               // .pipe(changed('dist'))
+               .pipe(debug())
                .pipe(gulp.dest('dist'))
 });
 
-gulp.task('wxml', ['cleanwxml'], function () {
+gulp.task('wxml', function () {
     return gulp.src('src/**/*.wxml')
-               // .pipe(changed('src'))
-               .pipe(debug())
                .pipe(replace(/\n+|\t+/g, ' '))
                // 将连续空格替换为单个空格
                .pipe(replace(/\s+/g, ' '))
@@ -85,31 +83,46 @@ gulp.task('wxml', ['cleanwxml'], function () {
                .pipe(replace(/(\s<)/g, '<'))
                // 删除注释
                .pipe(replace(/<!--[\w\W\r\n]*?-->/g, ''))
+               .pipe(changed('dist'))
+               .pipe(debug())
                .pipe(gulp.dest('dist'))
 });
 
-gulp.task('json', ['cleanjson'], function () {
+gulp.task('json', function () {
     return gulp.src('src/**/*.json')
                .pipe(jsonminify())
+               .pipe(changed('dist'))
+               .pipe(debug())
                .pipe(gulp.dest('dist'))
 });
 
 
-gulp.task('js', ['cleanjs'], function () {
+gulp.task('js', function () {
     return gulp.src('src/**/*.js')
+               .pipe(changed('dist'))
                // .pipe(babel())
                // .pipe(uglify())
+               .pipe(debug())
                .pipe(gulp.dest('dist'))
 });
 
-gulp.task('wxs', ['cleanwxs'], function () {
+gulp.task('wxs', function () {
     return gulp.src('src/**/*.wxs')
+               .pipe(changed('dist'))
+               .pipe(debug())
                // .pipe(babel())
                // .pipe(uglify())
                .pipe(gulp.dest('dist'))
 });
 
-gulp.task('img', ['cleanimg'], function () {
+gulp.task('wxss', function () {
+    return gulp.src('src/**/*.wxss')
+               .pipe(changed('dist'))
+               .pipe(debug())
+               .pipe(gulp.dest('dist'))
+});
+
+gulp.task('img', function () {
     return gulp.src('src/**/{**.jpg,**.jpeg,**.png,**.gif}')
                .pipe(imagemin([
                    imagemin.gifsicle(),
@@ -122,6 +135,8 @@ gulp.task('img', ['cleanimg'], function () {
                    {optimizationLevel: 7},
                    {}
                ], true))
+               .pipe(changed('dist'))
+               .pipe(debug())
                .pipe(gulp.dest('dist'))
 });
 
@@ -131,10 +146,11 @@ gulp.task('watch', function () {
     gulp.watch('src/**/*.json', ['json']);
     gulp.watch('src/**/*.js', ['js']);
     gulp.watch('src/**/*.wxs', ['wxs']);
+    gulp.watch('src/**/*.wxss', ['wxss']);
     gulp.watch('src/**/{**.jpg,**.jpeg,**.png,**.gif}', ['img']);
 });
 
 gulp.task('default', ['clean'], function () {
-    gulp.start('sass', 'wxml', 'json', 'js', 'img', 'wxs');
+    gulp.start('sass', 'wxml', 'json', 'js', 'img', 'wxs', 'wxss');
     gulp.start(['watch']);
 });
